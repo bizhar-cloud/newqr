@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BIZHAR COMPUTER | SCANNER POS</title>
+    <title>BIZHAR COMPUTER | PRO POS</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -14,115 +14,179 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&family=Outfit:wght@400;700&display=swap');
 
         :root {
-            --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --primary: #2563eb; --border: #e2e8f0;
+            --bg: #f8fafc; 
+            --card: #ffffff; 
+            --text: #0f172a; 
+            --primary: #2563eb; 
+            --border: #e2e8f0;
+            --header-bg: #ffffff;
+            --input-bg: #f1f5f9;
         }
 
         body.dark-mode {
-            --bg: #0b0f1a; --card: #161e2e; --text: #f8fafc; --primary: #3b82f6; --border: #2d3748;
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --text: #f8fafc; 
+            --primary: #3b82f6; 
+            --border: #334155;
+            --header-bg: #1e293b;
+            --input-bg: #0f172a;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Noto Sans Arabic', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: 0.3s ease; }
+        body { font-family: 'Noto Sans Arabic', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: env(safe-area-inset-bottom); }
 
+        /* Fixed Header Fix */
         header { 
-            background: var(--card); padding: 15px 20px; border-bottom: 2px solid var(--primary);
-            display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000;
+            background: var(--header-bg); 
+            padding: 12px 15px; 
+            border-bottom: 2px solid var(--primary);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .logo-text { font-weight: 900; font-size: 18px; color: var(--primary); letter-spacing: 0.5px; }
+
+        .header-controls { display: flex; align-items: center; gap: 12px; }
+
+        /* Custom Styled Select */
+        #lang-sel {
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            background: var(--card);
+            color: var(--text);
+            font-weight: 700;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .mode-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
         }
 
         .container { max-width: 1400px; margin: 15px auto; padding: 0 15px; display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 992px) { .container { grid-template-columns: 380px 1fr; } }
 
-        .app-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .app-card { background: var(--card); padding: 22px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
         
         .form-group { margin-bottom: 15px; position: relative; }
-        label { display: block; font-size: 13px; margin-bottom: 5px; font-weight: 700; opacity: 0.8; }
+        label { display: block; font-size: 13px; margin-bottom: 6px; font-weight: 700; color: var(--text); opacity: 0.9; }
+        
         input, select { 
-            width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; 
-            background: var(--bg); color: var(--text); font-size: 15px; outline: none;
+            width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 14px; 
+            background: var(--input-bg); color: var(--text); font-size: 15px; outline: none;
         }
+        input:focus { border-color: var(--primary); background: var(--card); }
 
         .scan-btn {
-            position: absolute; left: 10px; top: 32px; background: var(--primary); color: white;
-            border: none; border-radius: 8px; width: 35px; height: 35px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            position: absolute; left: 8px; top: 32px; background: var(--primary); color: white;
+            border: none; border-radius: 10px; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5;
         }
-        [dir="ltr"] .scan-btn { left: unset; right: 10px; }
+        [dir="ltr"] .scan-btn { left: auto; right: 8px; }
 
-        .main-btn { width: 100%; padding: 15px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        #reader { width: 100%; border-radius: 15px; overflow: hidden; margin-bottom: 15px; display: none; border: 2px solid var(--primary); }
+        .main-btn { 
+            width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: 900; 
+            cursor: pointer; background: var(--primary); color: white; 
+            display: flex; align-items: center; justify-content: center; gap: 10px; 
+            box-shadow: 0 8px 15px rgba(37, 99, 235, 0.2);
+        }
 
-        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        @media (min-width: 768px) { .stats { grid-template-columns: repeat(5, 1fr); } }
-        .s-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
-        .s-card h3 { margin: 5px 0; color: var(--primary); }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        @media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(5, 1fr); } }
+        .s-item { background: var(--card); padding: 15px; border-radius: 18px; text-align: center; border: 1px solid var(--border); }
+        .s-item h3 { margin: 8px 0 0; font-size: 18px; font-weight: 800; color: var(--primary); }
 
         .table-wrap { background: var(--card); border-radius: 20px; overflow-x: auto; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        th, td { padding: 15px; text-align: inherit; border-bottom: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; min-width: 750px; }
+        th { background: rgba(0,0,0,0.03); padding: 18px; text-align: inherit; font-weight: 800; border-bottom: 2px solid var(--border); }
+        td { padding: 16px; border-bottom: 1px solid var(--border); }
 
-        .action-icon { width: 35px; height: 35px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; }
+        /* Scanner Modal UI */
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; margin-bottom: 15px; display: none; border: 3px solid var(--primary); }
     </style>
 </head>
 <body id="app-body">
 
 <header>
-    <div style="font-weight: 900; font-size: 18px; color: var(--primary);">BIZHAR COMPUTER</div>
-    <div style="display: flex; gap: 10px;">
-        <select id="lang-sel" onchange="changeLang()" style="width: 70px; border-radius: 8px;">
-            <option value="ku">KU</option><option value="ar">AR</option><option value="en">EN</option><option value="tr">TR</option>
+    <div class="logo-text">BIZHAR COMPUTER</div>
+    <div class="header-controls">
+        <select id="lang-sel" onchange="updateLang()">
+            <option value="ku">Kurdî</option>
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+            <option value="tr">Türkçe</option>
         </select>
-        <button onclick="toggleTheme()" class="action-icon"><i id="t-icon" class="fa-solid fa-moon"></i></button>
+        <button onclick="toggleTheme()" class="mode-btn" id="theme-toggle">
+            <i class="fa-solid fa-moon"></i>
+        </button>
     </div>
 </header>
 
 <div class="container">
     <div class="sidebar">
         <div class="app-card">
-            <h3 id="txt-title">تۆمارکرن</h3>
+            <h3 id="txt-title" style="margin-top:0; color: var(--primary);">تۆمارکرنا وەسڵێ</h3>
             
             <div id="reader"></div>
 
             <div class="form-group">
                 <label id="lbl-name">ناڤێ کڕیاری</label>
-                <input type="text" id="cust-name" placeholder="...">
+                <input type="text" id="cust-name" placeholder="ناڤێ کڕیاری بنڤێسە...">
             </div>
             
             <div class="form-group">
-                <label id="lbl-item">ئامێر (Scan یان هەلبژێرە)</label>
+                <label id="lbl-item">هەلبژارتنا ئامێری</label>
                 <select id="item-sel"></select>
-                <button class="scan-btn" onclick="startScan()"><i class="fa-solid fa-barcode"></i></button>
+                <button class="scan-btn" onclick="startScan()" title="Scan Barcode"><i class="fa-solid fa-barcode"></i></button>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group"><label id="lbl-buy">کڕین $</label><input type="number" id="p-buy" oninput="calc()"></div>
-                <div class="form-group"><label id="lbl-down">پێشەکی $</label><input type="number" id="p-down" oninput="calc()"></div>
+                <div class="form-group"><label id="lbl-buy">بهایێ کڕینێ $</label><input type="number" id="p-buy" oninput="calculate()"></div>
+                <div class="form-group"><label id="lbl-down">پێشەکی $</label><input type="number" id="p-down" oninput="calculate()"></div>
             </div>
 
             <div class="form-group">
-                <label id="lbl-m">قیست (Months)</label>
-                <select id="p-months" onchange="calc()">
+                <label id="lbl-m">ماوێ قیستێ (هەیڤ)</label>
+                <select id="p-months" onchange="calculate()">
                     <option value="6">6 Months (38%)</option>
                     <option value="12">12 Months (56%)</option>
                     <option value="16">16 Months (75%)</option>
                 </select>
             </div>
 
-            <div style="background: rgba(37,99,235,0.1); padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px;">
-                <small id="lbl-mon">هەیڤانە (Monthly)</small>
-                <div id="out-mon" style="font-size: 24px; font-weight: 900; color: var(--primary);">$ 0.00</div>
+            <div style="background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(37,99,235,0.05)); padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; border: 1px solid var(--primary);">
+                <small id="lbl-mon" style="font-weight:700; opacity:0.7">قیستێ هەیڤانە</small>
+                <div id="out-mon" style="font-size: 28px; font-weight: 900; color: var(--primary);">$ 0.00</div>
             </div>
 
-            <button class="main-btn" onclick="save()"><i class="fa-solid fa-check"></i> <span id="btn-txt">پاشکەفتکرن</span></button>
+            <button class="main-btn" onclick="saveData()"><i class="fa-solid fa-save"></i> <span id="btn-txt">پاشکەفتکرن</span></button>
         </div>
     </div>
 
     <div class="main">
-        <div class="stats">
-            <div class="s-card"><small id="s1">مەخزەن</small><h3 id="v1">0</h3></div>
-            <div class="s-card"><small id="s2">کڕیار</small><h3 id="v2">0</h3></div>
-            <div class="s-card"><small id="s3">قەرز</small><h3 id="v3">0 $</h3></div>
-            <div class="s-card"><small id="s4">داهات</small><h3 id="v4">0 $</h3></div>
-            <div class="s-card" style="border-color: #10b981;"><small id="s5">قازانج</small><h3 id="v5" style="color:#10b981">0 $</h3></div>
+        <div class="stats-grid">
+            <div class="s-item"><small id="s1">مەخزەن</small><h3 id="v1">0</h3></div>
+            <div class="s-item"><small id="s2">کڕیار</small><h3 id="v2">0</h3></div>
+            <div class="s-item"><small id="s3">قەرز</small><h3 id="v3">0 $</h3></div>
+            <div class="s-item"><small id="s4">داهات</small><h3 id="v4">0 $</h3></div>
+            <div class="s-item" style="border-bottom: 4px solid #10b981;"><small id="s5">قازانج</small><h3 id="v5" style="color:#10b981">0 $</h3></div>
         </div>
 
         <div class="table-wrap">
@@ -142,14 +206,14 @@
     const db = firebase.database();
     let inventory = [], sales = [];
 
-    const langs = {
-        ku: { dir: "rtl", name: "ناڤێ کڕیاری", item: "ئامێر (Scan)", buy: "کڕین $", down: "پێشەکی $", m: "قیست", mon: "هەیڤانە", save: "پاشکەفتکرن", s1: "مەخزەن", s2: "کڕیار", s3: "قەرز", s4: "داهات", s5: "قازانج", th1: "کڕیار" },
-        en: { dir: "ltr", name: "Customer", item: "Item (Scan)", buy: "Cost $", down: "Down $", m: "Months", mon: "Monthly", save: "Save", s1: "Stock", s2: "Cust", s3: "Debt", s4: "Inc", s5: "Profit", th1: "Name" }
+    const lex = {
+        ku: { dir: "rtl", name: "ناڤێ کڕیاری", item: "هەلبژارتنا ئامێری", buy: "بهایێ کڕینێ $", down: "پێشەکی $", m: "ماوێ قیستێ", mon: "قیستێ هەیڤانە", save: "پاشکەفتکرن", s1: "مەخزەن", s5: "قازانج", th1: "کڕیار" },
+        en: { dir: "ltr", name: "Customer Name", item: "Select Device", buy: "Cost Price $", down: "Down Payment $", m: "Months", mon: "Monthly Payment", save: "Save Sale", s1: "Stock", s5: "Profit", th1: "Customer" }
     };
 
-    function changeLang() {
+    function updateLang() {
         const l = document.getElementById('lang-sel').value;
-        const t = (l === 'en' || l === 'tr') ? langs.en : langs.ku;
+        const t = (l === 'en' || l === 'tr') ? lex.en : lex.ku;
         document.getElementById('app-body').dir = t.dir;
         document.getElementById('lbl-name').innerText = t.name;
         document.getElementById('lbl-item').innerText = t.item;
@@ -160,30 +224,12 @@
         document.getElementById('btn-txt').innerText = t.save;
         document.getElementById('s1').innerText = t.s1; document.getElementById('s5').innerText = t.s5;
         document.getElementById('th1').innerText = t.th1;
-        ui();
+        render();
     }
 
-    db.ref('/').on('value', snap => { const d = snap.val(); if(d){ inventory=d.i||[]; sales=d.s||[]; ui(); } });
+    db.ref('/').on('value', snap => { const d = snap.val(); if(d){ inventory=d.i||[]; sales=d.s||[]; render(); } });
 
-    // BARCODE SCANNER LOGIC
-    let scanner;
-    function startScan() {
-        document.getElementById('reader').style.display = 'block';
-        scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-        scanner.render((text) => {
-            // "text" is the Barcode value
-            const item = inventory.find(x => x.barcode === text || x.name === text);
-            if(item) {
-                document.getElementById('item-sel').value = item.name;
-                scanner.clear();
-                document.getElementById('reader').style.display = 'none';
-            } else {
-                alert("Barcode not found! Add it to inventory first.");
-            }
-        });
-    }
-
-    function calc() {
+    function calculate() {
         let b = parseFloat(document.getElementById('p-buy').value)||0, d = parseFloat(document.getElementById('p-down').value)||0, m = parseInt(document.getElementById('p-months').value);
         let rate = {6:0.38, 12:0.56, 16:0.75}[m];
         let total = b + (b * rate), mon = (total - d) / m;
@@ -191,10 +237,10 @@
         return { total, mon, d, m, b };
     }
 
-    function save() {
+    function saveData() {
         let n = document.getElementById('cust-name').value, i = document.getElementById('item-sel').value;
-        if(!n || !i) return alert("Hemiya pire bike!");
-        let p = calc();
+        if(!n || !i) return alert("تکایە هەمی خانەیان پڕ بکە!");
+        let p = calculate();
         let idx = inventory.findIndex(x => x.name === i);
         inventory[idx].qty--;
         sales.unshift({ id:Date.now(), name:n, item:i, total:p.total.toFixed(2), buy:p.b, down:p.d, mon:p.mon.toFixed(2), months:p.m, paid:0, date:new Date().toLocaleDateString() });
@@ -202,7 +248,7 @@
         document.getElementById('cust-name').value = "";
     }
 
-    function ui() {
+    function render() {
         document.getElementById('v1').innerText = inventory.reduce((a,b)=>a+b.qty,0);
         document.getElementById('v2').innerText = sales.length;
         let dbt=0, inc=0, pro=0;
@@ -215,22 +261,49 @@
         document.getElementById('v5').innerText = pro.toFixed(1)+"$";
 
         let sel = document.getElementById('item-sel'), tb = document.getElementById('list-body');
-        sel.innerHTML = '<option value="">...</option>'; 
-        inventory.forEach(x => { if(x.qty>0) sel.innerHTML += `<option value="${x.name}">${x.name}</option>`; });
+        sel.innerHTML = '<option value="">هەلبژێرە...</option>'; 
+        inventory.forEach(x => { if(x.qty>0) sel.innerHTML += `<option value="${x.name}">${x.name} (${x.qty})</option>`; });
         
         tb.innerHTML = '';
         sales.forEach(s => {
             let rem = (parseFloat(s.total) - parseFloat(s.down) - (s.paid * parseFloat(s.mon))).toFixed(1);
             tb.innerHTML += `<tr>
-                <td><b>${s.name}</b></td><td>${s.item}</td><td>${s.total}$</td><td style="color:${rem>0?'red':'green'}"><b>${rem}$</b></td>
-                <td><button class="action-icon" onclick="pay(${s.id})">+</button></td>
+                <td><b>${s.name}</b><br><small>${s.date}</small></td>
+                <td><span style="background:rgba(37,99,235,0.1); padding:4px 8px; border-radius:8px; font-size:12px;">${s.item}</span></td>
+                <td><b>${s.total}$</b></td>
+                <td style="color:${rem>0?'#ef4444':'#10b981'}"><b>${rem}$</b></td>
+                <td><button class="mode-btn" style="width:32px; height:32px;" onclick="payInstall(${s.id})"><i class="fa-solid fa-plus"></i></button></td>
             </tr>`;
         });
     }
 
-    function pay(id) { let s=sales.find(x=>x.id===id); if(s.paid < s.months){ s.paid++; db.ref('/').set({i:inventory, s:sales}); } }
-    function toggleTheme() { document.body.classList.toggle('dark-mode'); }
-    window.onload = changeLang;
+    function payInstall(id) { let s=sales.find(x=>x.id===id); if(s.paid < s.months){ s.paid++; db.ref('/').set({i:inventory, s:sales}); } }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const icon = document.querySelector('#theme-toggle i');
+        if(document.body.classList.contains('dark-mode')) {
+            icon.className = 'fa-solid fa-sun';
+        } else {
+            icon.className = 'fa-solid fa-moon';
+        }
+    }
+
+    let scanner;
+    function startScan() {
+        document.getElementById('reader').style.display = 'block';
+        scanner = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250 });
+        scanner.render((text) => {
+            const item = inventory.find(x => x.barcode === text || x.name === text);
+            if(item) {
+                document.getElementById('item-sel').value = item.name;
+                scanner.clear();
+                document.getElementById('reader').style.display = 'none';
+            }
+        });
+    }
+
+    window.onload = updateLang;
 </script>
 </body>
 </html>
