@@ -3,287 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIZHAR COMPUTER | POS SYSTEM</title>
+    <title>BIZHAR COMPUTER | GLOBAL POS</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap');
 
         :root {
-            --main-blue: #1a73e8;
-            --bg-gray: #f8f9fa;
-            --text-dark: #202124;
-            --border-color: #dadce0;
+            --bg: #f4f7f6; --card: #ffffff; --text: #1a1a1a; --primary: #0056b3; --border: #e0e0e0;
         }
 
-        * { box-sizing: border-box; font-family: 'Noto Sans Arabic', sans-serif; }
-        body { background-color: var(--bg-gray); color: var(--text-dark); margin: 0; padding: 0; }
+        body.dark-mode {
+            --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --primary: #58a6ff; --border: #30363d;
+        }
 
-        /* Header */
+        * { box-sizing: border-box; transition: 0.3s ease; }
+        body { font-family: 'Noto Sans Arabic', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+
         header { 
-            background: #ffffff; padding: 15px 20px; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .brand { font-size: 20px; font-weight: 700; color: var(--main-blue); }
-
-        /* Container */
-        .main-wrapper { max-width: 1200px; margin: auto; padding: 15px; display: grid; grid-template-columns: 1fr; gap: 20px; }
-
-        @media (min-width: 992px) {
-            .main-wrapper { grid-template-columns: 350px 1fr; }
+            background: var(--card); padding: 15px 25px; border-bottom: 2px solid var(--primary);
+            display: flex; justify-content: space-between; align-items: center; sticky; top: 0; z-index: 1000;
         }
 
-        /* Card Style */
-        .card { background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .card h3 { margin-top: 0; border-bottom: 2px solid var(--main-blue); padding-bottom: 10px; font-size: 16px; }
+        .container { max-width: 1300px; margin: 20px auto; padding: 0 15px; display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 992px) { .container { grid-template-columns: 360px 1fr; } }
 
-        /* Inputs */
+        .card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; margin-bottom: 5px; font-weight: bold; }
+        label { display: block; font-size: 13px; margin-bottom: 6px; font-weight: bold; }
         input, select { 
-            width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; 
-            font-size: 14px; outline: none; background: #fff;
+            width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; 
+            background: var(--card); color: var(--text); outline: none;
         }
-        input:focus { border-color: var(--main-blue); box-shadow: 0 0 5px rgba(26,115,232,0.2); }
 
-        /* Buttons */
-        .btn { 
-            width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: bold; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;
-        }
-        .btn-primary { background-color: var(--main-blue); color: white; }
-        .btn-primary:hover { background-color: #1557b0; }
-        .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-dark); margin-top: 10px; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-mode { background: none; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; }
 
-        /* Calculation Box */
-        .calc-box { background: #e8f0fe; padding: 15px; border-radius: 6px; margin: 15px 0; text-align: center; }
-        .calc-box .amount { font-size: 24px; font-weight: 900; color: var(--main-blue); }
+        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        @media (min-width: 600px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+        .stat-box { background: var(--card); padding: 20px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
+        .stat-box h2 { margin: 5px 0 0; color: var(--primary); }
 
-        /* Stats Row */
-        .stats-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        @media (min-width: 600px) { .stats-container { grid-template-columns: repeat(4, 1fr); } }
-        .stat-item { background: white; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid var(--border-color); }
-        .stat-item span { font-size: 12px; color: #5f6368; display: block; }
-        .stat-item b { font-size: 18px; color: var(--main-blue); }
+        .search-container { margin-bottom: 15px; display: flex; gap: 10px; }
+        .search-bar { flex: 1; position: relative; }
+        .search-bar i { position: absolute; left: 12px; top: 14px; opacity: 0.5; }
 
-        /* Table */
-        .table-container { background: white; border-radius: 8px; border: 1px solid var(--border-color); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { background: #f1f3f4; padding: 12px; text-align: right; font-size: 13px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
-
-        /* Mobile Adjustments */
-        @media (max-width: 600px) {
-            header { padding: 10px; }
-            .brand { font-size: 16px; }
-            .card { padding: 15px; }
-        }
+        .table-wrap { background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { background: rgba(0,0,0,0.03); padding: 15px; text-align: right; border-bottom: 1px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); }
     </style>
 </head>
-<body>
+<body id="b-tag">
 
 <header>
-    <div class="brand">BIZHAR COMPUTER | بژار کۆمپیوتەر</div>
-    <div style="display:flex; gap:10px;">
-        <button onclick="exportToExcel()" style="border:none; background:none; cursor:pointer; color:green;"><i class="fa-solid fa-file-excel fa-lg"></i></button>
-        <button onclick="openAdmin()" style="border:none; background:none; cursor:pointer; color:#555;"><i class="fa-solid fa-lock fa-lg"></i></button>
+    <div style="font-size: 20px; font-weight: 900; color: var(--primary);">BIZHAR COMPUTER</div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+        <select id="lang-sel" onchange="changeLang()" style="width: auto; padding: 5px;">
+            <option value="ku">Kurdî</option>
+            <option value="ar">العربية</option>
+            <option value="en">English</option>
+            <option value="fa">فارسی</option>
+            <option value="tr">Türkçe</option>
+        </select>
+        <button class="btn-mode" onclick="toggleMode()"><i id="m-icon" class="fa-solid fa-moon"></i></button>
     </div>
 </header>
 
-<div class="main-wrapper">
+<div class="container">
     <div class="sidebar">
         <div class="card">
-            <h3>تۆمارکرنا فرۆشتنێ</h3>
+            <h3 id="h-add">تۆمارکرنا نوو</h3>
             <div class="form-group">
-                <label>ناڤێ کڕیاری</label>
-                <input type="text" id="cust-name" placeholder="ناڤێ سیانی...">
+                <label id="l-name">ناڤێ کڕیاری</label>
+                <input type="text" id="c-name" placeholder="...">
             </div>
             <div class="form-group">
-                <label>ئامێر (مەخزەن)</label>
+                <label id="l-item">ئامێر</label>
                 <select id="item-sel"></select>
             </div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div class="form-group">
-                    <label>بهایێ کڕینێ $</label>
-                    <input type="number" id="cost-price" oninput="runCalc()">
-                </div>
-                <div class="form-group">
-                    <label>پێشەکی $</label>
-                    <input type="number" id="down-pay" oninput="runCalc()">
-                </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group"><label id="l-cost">بها $</label><input type="number" id="cost" oninput="calc()"></div>
+                <div class="form-group"><label id="l-down">پێشەکی $</label><input type="number" id="down" oninput="calc()"></div>
             </div>
             <div class="form-group">
-                <label>ماوێ قیستێ (هەیڤ)</label>
-                <select id="month-sel" onchange="runCalc()">
-                    <option value="6">6 هەیڤ (38%)</option>
-                    <option value="8">8 هەیڤ (45%)</option>
-                    <option value="12">12 هەیڤ (56%)</option>
-                    <option value="16">16 هەیڤ (75%)</option>
+                <label id="l-months">ماوێ قیستێ</label>
+                <select id="months" onchange="calc()">
+                    <option value="6">6 Months (38%)</option>
+                    <option value="8">8 Months (45%)</option>
+                    <option value="12">12 Months (56%)</option>
+                    <option value="16">16 Months (75%)</option>
                 </select>
             </div>
-            <div class="calc-box">
-                <label>هەیڤانە (Monthly)</label>
-                <div class="amount" id="monthly-text">0.00 $</div>
+            <div style="background: rgba(88, 166, 255, 0.1); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px;">
+                <small id="l-mon-label">هەیڤانە (Monthly)</small>
+                <div id="mon-out" style="font-size: 24px; font-weight: 900; color: var(--primary);">0.00 $</div>
             </div>
-            <button class="btn btn-primary" onclick="addOrder()">تۆمارکرنا وەصڵێ</button>
+            <button class="btn btn-primary" onclick="save()" id="b-save">پاشکەفتکرن</button>
+            <button class="btn" style="margin-top:10px; background:none; border:1px solid var(--border); color:var(--text)" onclick="openAdmin()" id="b-admin">مەخزەن</button>
         </div>
     </div>
 
-    <div class="content">
-        <div class="stats-container">
-            <div class="stat-item"><span id="l-inv">مەخزەن</span><b id="c-inv">0</b></div>
-            <div class="stat-item"><span id="l-cust">کڕیار</span><b id="c-cust">0</b></div>
-            <div class="stat-item"><span id="l-debt">کۆی قەرزان</span><b id="c-debt">0 $</b></div>
-            <div class="stat-item"><span id="l-inc">کۆی داهاتی</span><b id="c-inc">0 $</b></div>
+    <div class="main">
+        <div class="stats">
+            <div class="stat-box"><span id="s-inv">مەخزەن</span><h2 id="c-inv">0</h2></div>
+            <div class="stat-box"><span id="s-cust">کڕیار</span><h2 id="c-cust">0</h2></div>
+            <div class="stat-box"><span id="s-debt">قەرز</span><h2 id="c-debt">0 $</h2></div>
+            <div class="stat-box"><span id="s-inc">داهات</span><h2 id="c-inc">0 $</h2></div>
         </div>
 
-        <div class="table-container">
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" id="search" onkeyup="ui()" placeholder="گەڕیان ب ناڤێ کڕیاری...">
+            </div>
+        </div>
+
+        <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>کڕیار</th>
-                        <th>ئامێر</th>
-                        <th>گشتی</th>
-                        <th>باقی</th>
-                        <th>کردار</th>
+                        <th id="th-n">کڕیار</th><th id="th-i">ئامێر</th><th id="th-t">گشتی</th><th id="th-r">باقی</th><th id="th-a">کردار</th>
                     </tr>
                 </thead>
-                <tbody id="sales-list"></tbody>
+                <tbody id="tbody"></tbody>
             </table>
         </div>
     </div>
 </div>
 
 <script>
-    // Firebase Setup
     const firebaseConfig = { databaseURL: "https://bizhar-pos-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    let inv = [], sales = [];
 
-    let inventory = [], sales = [];
+    const dict = {
+        ku: { name: "ناڤێ کڕیاری", item: "ئامێر", cost: "بها $", down: "پێشەکی $", m: "ماوێ قیستێ", save: "پاشکەفتکرن", adm: "مەخزەن", s1: "مەخزەن", s2: "کڕیار", s3: "قەرز", s4: "داهات", th1: "کڕیار", search: "گەڕیان ب ناڤێ کڕیاری..." },
+        ar: { name: "اسم الزبون", item: "الجهاز", cost: "السعر $", down: "المقدمة $", m: "مدة القسط", save: "حفظ الوصل", adm: "المخزن", s1: "المخزن", s2: "الزبائن", s3: "الديون", s4: "الدخل", th1: "الزبون", search: "بحث باسم الزبون..." },
+        en: { name: "Customer Name", item: "Item", cost: "Price $", down: "Down $", m: "Months", save: "Save Sale", adm: "Stock", s1: "Stock", s2: "Cust", s3: "Debt", s4: "Income", th1: "Name", search: "Search customer..." },
+        fa: { name: "نام مشتری", item: "دستگاه", cost: "قیمت $", down: "پیش‌پرداخت $", m: "ماهانه", save: "ثبت", adm: "انبار", s1: "انبار", s2: "مشتری", s3: "بدهی", s4: "درآمد", th1: "مشتری", search: "جستجوی نام..." },
+        tr: { name: "Müşteri Adı", item: "Ürün", cost: "Fiyat $", down: "Peşinat $", m: "Taksit", save: "Kaydet", adm: "Stok", s1: "Stok", s2: "Müşteri", s3: "Borç", s4: "Gelir", th1: "Müşteri", search: "İsimle ara..." }
+    };
 
-    // Sync Data
-    db.ref('/').on('value', snap => {
-        const data = snap.val();
-        if(data) {
-            inventory = data.i || [];
-            sales = data.s || [];
-            updateUI();
-        }
-    });
-
-    function runCalc() {
-        let cost = parseFloat(document.getElementById('cost-price').value) || 0;
-        let down = parseFloat(document.getElementById('down-pay').value) || 0;
-        let months = parseInt(document.getElementById('month-sel').value);
-        let rates = {6:0.38, 8:0.45, 12:0.56, 16:0.75};
-        
-        let total = cost + (cost * rates[months]);
-        let monthly = (total - down) / months;
-        
-        document.getElementById('monthly-text').innerText = monthly.toFixed(2) + " $";
-        return { total, monthly, down, months };
+    function changeLang() {
+        let l = document.getElementById('lang-sel').value;
+        let t = dict[l] || dict.ku;
+        document.body.dir = (l === 'en' || l === 'tr') ? 'ltr' : 'rtl';
+        document.getElementById('l-name').innerText = t.name;
+        document.getElementById('l-item').innerText = t.item;
+        document.getElementById('l-cost').innerText = t.cost;
+        document.getElementById('l-down').innerText = t.down;
+        document.getElementById('l-months').innerText = t.m;
+        document.getElementById('b-save').innerText = t.save;
+        document.getElementById('b-admin').innerText = t.adm;
+        document.getElementById('s-inv').innerText = t.s1; document.getElementById('s-cust').innerText = t.s2;
+        document.getElementById('s-debt').innerText = t.s3; document.getElementById('s-inc').innerText = t.s4;
+        document.getElementById('th-n').innerText = t.th1;
+        document.getElementById('search').placeholder = t.search;
+        ui();
     }
 
-    function addOrder() {
-        let name = document.getElementById('cust-name').value;
-        let item = document.getElementById('item-sel').value;
-        if(!name || !item) return alert("تکایە هەمی زانیاریان پڕ بکە");
-
-        let p = runCalc();
-        let idx = inventory.findIndex(x => x.name === item);
-        
-        if(inventory[idx].qty > 0) {
-            inventory[idx].qty--;
-            sales.unshift({
-                id: Date.now(),
-                name: name,
-                item: item,
-                total: p.total.toFixed(2),
-                down: p.down.toFixed(2),
-                monthly: p.monthly.toFixed(2),
-                months: p.months,
-                paidCount: 0,
-                date: new Date().toLocaleDateString('ku-IQ')
-            });
-            saveToDB();
-            document.getElementById('cust-name').value = "";
-        }
+    function toggleMode() {
+        document.body.classList.toggle('dark-mode');
+        let icon = document.getElementById('m-icon');
+        icon.className = icon.className.includes('moon') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
 
-    function saveToDB() {
-        db.ref('/').set({ i: inventory, s: sales });
+    db.ref('/').on('value', s => { let d = s.val(); if(d){ inv=d.i||[]; sales=d.s||[]; ui(); } });
+
+    function calc() {
+        let p = parseFloat(document.getElementById('cost').value)||0, d = parseFloat(document.getElementById('down').value)||0, m = parseInt(document.getElementById('months').value);
+        let r = {6:0.38, 8:0.45, 12:0.56, 16:0.75}[m];
+        let total = p + (p*r), mon = (total - d)/m;
+        document.getElementById('mon-out').innerText = mon.toFixed(2) + " $";
+        return { total, mon, d, m };
     }
 
-    function updateUI() {
-        // Update Stats
-        document.getElementById('c-inv').innerText = inventory.reduce((a,b)=> a+b.qty, 0);
+    function save() {
+        let n = document.getElementById('c-name').value, i = document.getElementById('item-sel').value;
+        if(!n || !i) return alert("Pire bike!");
+        let p = calc();
+        let idx = inv.findIndex(x => x.name === i);
+        inv[idx].qty--;
+        sales.unshift({ id:Date.now(), name:n, item:i, total:p.total.toFixed(2), down:p.d.toFixed(2), mon:p.mon.toFixed(2), months:p.m, paid:0, date:new Date().toLocaleDateString() });
+        db.ref('/').set({ i: inv, s: sales });
+        document.getElementById('c-name').value = "";
+    }
+
+    function ui() {
+        document.getElementById('c-inv').innerText = inv.reduce((a,b)=>a+b.qty,0);
         document.getElementById('c-cust').innerText = sales.length;
+        let dbt=0, inc=0;
+        sales.forEach(s => { let p_v = parseFloat(s.down)+(s.paid*parseFloat(s.mon)); inc+=p_v; dbt+=(parseFloat(s.total)-p_v); });
+        document.getElementById('c-debt').innerText = dbt.toFixed(1)+"$";
+        document.getElementById('c-inc').innerText = inc.toFixed(1)+"$";
+
+        let sel = document.getElementById('item-sel'), tb = document.getElementById('tbody'), q = document.getElementById('search').value.toLowerCase();
+        sel.innerHTML = ''; inv.forEach(x => { if(x.qty>0) sel.innerHTML += `<option value="${x.name}">${x.name} (${x.qty})</option>`; });
         
-        let totalDebt = 0, totalIncome = 0;
-        sales.forEach(s => {
-            let paid = parseFloat(s.down) + (s.paidCount * parseFloat(s.monthly));
-            totalIncome += paid;
-            totalDebt += (parseFloat(s.total) - paid);
-        });
-        document.getElementById('c-debt').innerText = totalDebt.toFixed(2) + " $";
-        document.getElementById('c-inc').innerText = totalIncome.toFixed(2) + " $";
-
-        // Update Select
-        let sel = document.getElementById('item-sel');
-        sel.innerHTML = '<option value="">ئامێری هەلبژێرە...</option>';
-        inventory.forEach(x => {
-            if(x.qty > 0) sel.innerHTML += `<option value="${x.name}">${x.name} (${x.qty})</option>`;
-        });
-
-        // Update Table
-        let list = document.getElementById('sales-list');
-        list.innerHTML = '';
-        sales.forEach(s => {
-            let remaining = (parseFloat(s.total) - parseFloat(s.down) - (s.paidCount * parseFloat(s.monthly))).toFixed(2);
-            list.innerHTML += `
-                <tr>
-                    <td><b>${s.name}</b><br><small>${s.date}</small></td>
-                    <td>${s.item}</td>
-                    <td>${s.total} $</td>
-                    <td style="color:${remaining > 0 ? 'red' : 'green'}"><b>${remaining} $</b></td>
-                    <td>
-                        <button onclick="payInstallment(${s.id})" style="padding:5px 10px; cursor:pointer;">+ قیست</button>
-                    </td>
-                </tr>
-            `;
+        tb.innerHTML = '';
+        sales.filter(s => s.name.toLowerCase().includes(q)).forEach(s => {
+            let rem = (parseFloat(s.total) - parseFloat(s.down) - (s.paid * parseFloat(s.mon))).toFixed(1);
+            tb.innerHTML += `<tr><td><b>${s.name}</b><br><small>${s.date}</small></td><td>${s.item}</td><td>${s.total}$</td><td style="color:red"><b>${rem}$</b></td>
+            <td><button onclick="pay(${s.id})" style="cursor:pointer; padding:5px 10px;">+ قیست</button></td></tr>`;
         });
     }
 
-    function payInstallment(id) {
-        let s = sales.find(x => x.id === id);
-        if(s.paidCount < s.months) {
-            s.paidCount++;
-            saveToDB();
-        } else {
-            alert("ئەڤ قەرزە ب تەمامی هاتییە دان");
-        }
-    }
-
-    function openAdmin() {
-        let pass = prompt("پاسۆردێ ڕێکخستنێ:");
-        if(pass === "1234") {
-            let n = prompt("ناڤێ ئامێرێ نوو:");
-            let q = parseInt(prompt("عدەد (چەند دانە):"));
-            if(n && q) {
-                let f = inventory.find(x => x.name === n);
-                if(f) f.qty += q; else inventory.push({name:n, qty:q});
-                saveToDB();
-            }
-        }
-    }
-
-    function exportToExcel() {
-        alert("ئەڤ فرمانە تنێ ل سەر کۆمپیوتەرێ کار دکەت");
-    }
+    function pay(id) { let s=sales.find(x=>x.id===id); if(s.paid < s.months){ s.paid++; db.ref('/').set({i:inv, s:sales}); } }
+    function openAdmin() { let p=prompt("Pass:"); if(p==="1234") { let n=prompt("Item:"), q=parseInt(prompt("Qty:")); if(n&&q){ let f=inv.find(x=>x.name===n); if(f) f.qty+=q; else inv.push({name:n, qty:q}); db.ref('/').set({i:inv, s:sales}); } } }
 </script>
-
 </body>
 </html>
