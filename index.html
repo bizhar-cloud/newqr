@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BIZHAR COMPUTER | PRO SYSTEM</title>
+    <title>BIZHAR COMPUTER | PRO POS</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -36,20 +36,17 @@
             background: var(--bg); color: var(--text); cursor: pointer; font-size: 14px; font-weight: 700;
         }
 
-        /* Container & Layout Modes */
         .container { max-width: 1400px; margin: 15px auto; padding: 0 10px; display: grid; gap: 20px; transition: all 0.4s ease; }
-        
-        /* PC Mode Class */
         .pc-layout { grid-template-columns: 380px 1fr !important; }
 
         .card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         
-        .section-title { font-weight: 900; margin-bottom: 15px; color: var(--primary); border-right: 4px solid var(--primary); padding-right: 10px; }
-
         label { font-size: 13px; font-weight: 700; display: block; margin-top: 10px; }
+        
         input, select { 
             width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; 
-            background: var(--bg); color: var(--text); font-size: 15px; margin-top: 5px; outline: none;
+            background: var(--card); color: var(--text); font-size: 15px; margin-top: 5px; 
+            outline: none; appearance: auto;
         }
 
         .main-btn { 
@@ -69,7 +66,6 @@
         td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
         #scanner-ui { width: 100%; border-radius: 15px; overflow: hidden; display: none; margin-bottom: 15px; border: 3px solid var(--primary); }
-
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
 
         @media print {
@@ -84,65 +80,64 @@
 <header>
     <div class="brand">BIZHAR COMPUTER</div>
     <div style="display: flex; gap: 8px;">
-        <button class="btn-tool" onclick="togglePCMode()" title="PC Mode"><i class="fa-solid fa-desktop"></i></button>
+        <button class="btn-tool" onclick="togglePCMode()"><i class="fa-solid fa-desktop"></i></button>
         <button class="btn-tool" onclick="document.getElementById('inv-modal').style.display='flex'"><i class="fa-solid fa-box-open"></i></button>
         <button class="btn-tool" onclick="toggleDark()"><i id="dark-icon" class="fa-solid fa-moon"></i></button>
-        <select id="lang-sel" class="btn-tool" onchange="changeLang()" style="width: 60px;">
-            <option value="ku">KU</option><option value="en">EN</option>
-        </select>
     </div>
 </header>
 
 <div class="container" id="main-container">
     <div class="sidebar">
         <div class="card">
-            <h3 class="section-title" id="t-form">تۆمارکرنا وەسڵێ</h3>
-            
+            <h3 style="font-weight: 900; color: var(--primary);">تۆمارکرنا وەسڵێ</h3>
             <div id="scanner-ui"></div>
 
-            <label id="l-name">ناڤێ کڕیاری</label>
-            <input type="text" id="in-name" placeholder="بۆ نموونە: ئەحمەد...">
+            <label>ناڤێ کڕیاری</label>
+            <input type="text" id="in-name" placeholder="ناڤێ کڕیاری...">
 
-            <label id="l-item">هەلبژارتنا ئامێری</label>
+            <label>هەلبژارتنا ئامێری</label>
             <div style="display:flex; gap:8px;">
                 <select id="in-item"></select>
                 <button onclick="openScanner()" class="btn-tool" style="background:var(--primary); color:white;"><i class="fa-solid fa-barcode"></i></button>
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div><label id="l-buy">بهایێ کڕینێ $</label><input type="number" id="in-buy" oninput="updateCalculation()"></div>
-                <div><label id="l-down">پێشەکی $</label><input type="number" id="in-down" oninput="updateCalculation()"></div>
+                <div><label>بهایێ کڕینێ $</label><input type="number" id="in-buy" oninput="updateCalculation()"></div>
+                <div><label>پێشەکی $</label><input type="number" id="in-down" oninput="updateCalculation()"></div>
             </div>
 
-            <label id="l-months">ماوێ قیستێ (هەیڤ)</label>
+            <label>ماوێ قیستێ (هەیڤ)</label>
             <select id="in-months" onchange="updateCalculation()">
-                <option value="6">6 Months (38%)</option>
-                <option value="12">12 Months (56%)</option>
-                <option value="16">16 Months (75%)</option>
+                <option value="6">6 Months</option>
+                <option value="8">8 Months</option>
+                <option value="10">10 Months</option>
+                <option value="12">12 Months</option>
+                <option value="14">14 Months</option>
+                <option value="16">16 Months</option>
             </select>
 
             <div style="background: var(--bg); padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; border: 2px dashed var(--primary);">
-                <small id="l-mon" style="font-weight:700; opacity:0.7;">قیستێ هەیڤانە</small>
+                <small style="font-weight:700; opacity:0.7;">قیستێ هەیڤانە</small>
                 <div id="out-monthly" style="font-size: 28px; font-weight: 900; color: var(--primary);">$ 0.00</div>
             </div>
 
-            <button class="main-btn" onclick="saveToCloud()"><i class="fa-solid fa-save"></i> <span id="b-save">پاشکەفتکرن</span></button>
+            <button class="main-btn" onclick="saveToCloud()"><i class="fa-solid fa-save"></i> <span>پاشکەفتکرن</span></button>
         </div>
     </div>
 
     <div class="content">
         <div class="stats-grid">
-            <div class="stat-item"><small id="s1">مەخزەن</small><h3 id="v1">0</h3></div>
-            <div class="stat-item"><small id="s2">کڕیار</small><h3 id="v2">0</h3></div>
-            <div class="stat-item"><small id="s3">قەرز</small><h3 id="v3">0$</h3></div>
-            <div class="stat-item" style="border-color: var(--success);"><small id="s4">قازانج</small><h3 id="v4" style="color: var(--success);">0$</h3></div>
+            <div class="stat-item"><small>مەخزەن</small><h3 id="v1">0</h3></div>
+            <div class="stat-item"><small>کڕیار</small><h3 id="v2">0</h3></div>
+            <div class="stat-item"><small>قەرز</small><h3 id="v3">0$</h3></div>
+            <div class="stat-item" style="border-color: var(--success);"><small>قازانج</small><h3 id="v4" style="color: var(--success);">0$</h3></div>
         </div>
 
         <div class="table-area">
             <div class="scroll-box">
                 <table>
                     <thead>
-                        <tr><th id="th1">کڕیار</th><th id="th2">ئامێر</th><th id="th3">گشتی</th><th id="th4">باقی</th><th id="th5">کردار</th></tr>
+                        <tr><th>کڕیار</th><th>ئامێر</th><th>گشتی</th><th>باقی</th><th>کردار</th></tr>
                     </thead>
                     <tbody id="sales-body"></tbody>
                 </table>
@@ -153,7 +148,7 @@
 
 <div class="modal" id="inv-modal">
     <div class="card" style="width:100%; max-width:400px;">
-        <h3 class="section-title">زێدەکرنا کالای</h3>
+        <h3>زێدەکرنا کالای</h3>
         <input type="text" id="add-n" placeholder="ناڤێ کالای">
         <input type="text" id="add-b" placeholder="بارکۆد">
         <input type="number" id="add-q" placeholder="ژمارە (Qty)">
@@ -165,13 +160,7 @@
 </div>
 
 <div id="receipt-box" style="display:none; padding:30px; border:1px solid #000;">
-    <h2>BIZHAR COMPUTER</h2>
-    <hr>
-    <p id="r-date"></p>
-    <p id="r-name"></p>
-    <p id="r-item"></p>
-    <h3 id="r-total"></h3>
-    <p>سوپاس بۆ سەرەدانا تە</p>
+    <h2>BIZHAR COMPUTER</h2><hr><p id="r-date"></p><p id="r-name"></p><p id="r-item"></p><h3 id="r-total"></h3><p>سوپاس بۆ سەرەدانا تە</p>
 </div>
 
 <script>
@@ -180,27 +169,21 @@
     const db = firebase.database();
     let inventory = [], sales = [];
 
-    // Toggle PC/Mobile Layout
-    function togglePCMode() {
-        const container = document.getElementById('main-container');
-        container.classList.toggle('pc-layout');
-    }
-
-    function toggleDark() {
-        document.body.classList.toggle('dark-mode');
+    function togglePCMode() { document.getElementById('main-container').classList.toggle('pc-layout'); }
+    function toggleDark() { 
+        document.body.classList.toggle('dark-mode'); 
         document.getElementById('dark-icon').className = document.body.classList.contains('dark-mode') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
 
-    db.ref('/').on('value', snap => {
-        const d = snap.val();
-        if(d) { inventory = d.i || []; sales = d.s || []; updateUI(); }
-    });
+    db.ref('/').on('value', snap => { const d = snap.val(); if(d) { inventory = d.i || []; sales = d.s || []; updateUI(); } });
 
     function updateCalculation() {
         let buy = parseFloat(document.getElementById('in-buy').value) || 0;
         let down = parseFloat(document.getElementById('in-down').value) || 0;
         let months = parseInt(document.getElementById('in-months').value);
-        let rate = {6:0.38, 12:0.56, 16:0.75}[months];
+        
+        // Custom rates for each month option
+        let rate = {6:0.38, 8:0.45, 10:0.52, 12:0.60, 14:0.68, 16:0.75}[months];
         
         let total = buy + (buy * rate);
         let monthly = (total - down) / months;
@@ -212,88 +195,55 @@
         let name = document.getElementById('in-name').value;
         let item = document.getElementById('in-item').value;
         if(!name || !item) return alert("Hەمی خانەیان پڕ بکە!");
-        
         let p = updateCalculation();
         let idx = inventory.findIndex(x => x.name === item);
         inventory[idx].qty--;
-        
-        sales.unshift({ 
-            id: Date.now(), name, item, total: p.total.toFixed(2), 
-            buy: p.buy, down: p.down, mon: p.monthly.toFixed(2), 
-            months: p.months, paid: 0, date: new Date().toLocaleDateString() 
-        });
-        
+        sales.unshift({ id: Date.now(), name, item, total: p.total.toFixed(2), buy: p.buy, down: p.down, mon: p.monthly.toFixed(2), months: p.months, paid: 0, date: new Date().toLocaleDateString() });
         db.ref('/').set({ i: inventory, s: sales });
         document.getElementById('in-name').value = "";
     }
 
     function addStock() {
-        let n = document.getElementById('add-n').value;
-        let b = document.getElementById('add-b').value;
-        let q = parseInt(document.getElementById('add-q').value);
-        if(n && q) {
-            inventory.push({ name: n, barcode: b, qty: q });
-            db.ref('/').set({ i: inventory, s: sales });
-            document.getElementById('inv-modal').style.display = 'none';
-        }
+        let n = document.getElementById('add-n').value, b = document.getElementById('add-b').value, q = parseInt(document.getElementById('add-q').value);
+        if(n && q) { inventory.push({ name: n, barcode: b, qty: q }); db.ref('/').set({ i: inventory, s: sales }); document.getElementById('inv-modal').style.display = 'none'; }
     }
 
     function updateUI() {
         document.getElementById('v1').innerText = inventory.reduce((a,b) => a + b.qty, 0);
         document.getElementById('v2').innerText = sales.length;
-        
         let debt = 0, profit = 0;
         sales.forEach(s => {
             let remain = parseFloat(s.total) - parseFloat(s.down) - (s.paid * parseFloat(s.mon));
-            debt += remain;
-            profit += (parseFloat(s.total) - parseFloat(s.buy));
+            debt += remain; profit += (parseFloat(s.total) - parseFloat(s.buy));
         });
         document.getElementById('v3').innerText = debt.toFixed(1) + "$";
         document.getElementById('v4').innerText = profit.toFixed(1) + "$";
-
         let sel = document.getElementById('in-item');
         sel.innerHTML = '<option value="">هەلبژێرە...</option>';
         inventory.forEach(x => { if(x.qty > 0) sel.innerHTML += `<option value="${x.name}">${x.name} (${x.qty})</option>`; });
-
         let list = document.getElementById('sales-body');
         list.innerHTML = '';
         sales.forEach(s => {
             let rem = (parseFloat(s.total) - parseFloat(s.down) - (s.paid * parseFloat(s.mon))).toFixed(1);
-            list.innerHTML += `<tr>
-                <td><b>${s.name}</b></td><td>${s.item}</td><td>${s.total}$</td>
-                <td style="color:${rem > 0 ? '#ef4444' : '#10b981'}"><b>${rem}$</b></td>
-                <td>
-                    <button class="btn-tool" onclick="payInst(${s.id})"><i class="fa-solid fa-plus"></i></button>
-                    <button class="btn-tool" onclick="printRec(${s.id})"><i class="fa-solid fa-print"></i></button>
-                </td>
-            </tr>`;
+            list.innerHTML += `<tr><td><b>${s.name}</b></td><td>${s.item}</td><td>${s.total}$</td><td style="color:${rem > 0 ? '#ef4444' : '#10b981'}"><b>${rem}$</b></td>
+            <td><button class="btn-tool" onclick="payInst(${s.id})"><i class="fa-solid fa-plus"></i></button>
+            <button class="btn-tool" onclick="printRec(${s.id})"><i class="fa-solid fa-print"></i></button></td></tr>`;
         });
     }
 
-    function payInst(id) {
-        let s = sales.find(x => x.id === id);
-        if(s.paid < s.months) { s.paid++; db.ref('/').set({ i: inventory, s: sales }); }
-    }
-
+    function payInst(id) { let s = sales.find(x => x.id === id); if(s.paid < s.months) { s.paid++; db.ref('/').set({ i: inventory, s: sales }); } }
     function printRec(id) {
         let s = sales.find(x => x.id === id);
-        document.getElementById('r-date').innerText = "Date: " + s.date;
-        document.getElementById('r-name').innerText = "Customer: " + s.name;
-        document.getElementById('r-item').innerText = "Item: " + s.item;
-        document.getElementById('r-total').innerText = "Total: " + s.total + "$";
+        document.getElementById('r-date').innerText = "Date: " + s.date; document.getElementById('r-name').innerText = "Customer: " + s.name;
+        document.getElementById('r-item').innerText = "Item: " + s.item; document.getElementById('r-total').innerText = "Total: " + s.total + "$";
         window.print();
     }
-
     function openScanner() {
         document.getElementById('scanner-ui').style.display = 'block';
         let sc = new Html5QrcodeScanner("scanner-ui", { fps: 15, qrbox: 250 });
         sc.render((txt) => {
             let f = inventory.find(x => x.barcode === txt || x.name === txt);
-            if(f) {
-                document.getElementById('in-item').value = f.name;
-                sc.clear();
-                document.getElementById('scanner-ui').style.display = 'none';
-            }
+            if(f) { document.getElementById('in-item').value = f.name; sc.clear(); document.getElementById('scanner-ui').style.display = 'none'; }
         });
     }
 </script>
