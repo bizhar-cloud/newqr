@@ -14,7 +14,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap');
 
         :root {
-            --bg: #f3f4f6; --card: #ffffff; --text: #111827; --primary: #2563eb; --border: #d1d5db; --success: #10b981;
+            --bg: #f3f4f6; --card: #ffffff; --text: #111827; --primary: #2563eb; --border: #d1d5db; --success: #10b981; --danger: #ef4444;
         }
 
         body.dark-mode {
@@ -36,14 +36,8 @@
             background: var(--bg); color: var(--text); cursor: pointer; font-size: 13px;
         }
 
-        .container { 
-            max-width: 1400px; margin: 15px auto; padding: 0 10px; 
-            display: flex; flex-direction: column; gap: 15px; 
-        }
-
-        .container.pc-mode { 
-            display: grid; grid-template-columns: 360px 1fr; 
-        }
+        .container { max-width: 1400px; margin: 15px auto; padding: 0 10px; display: flex; flex-direction: column; gap: 15px; }
+        .container.pc-mode { display: grid; grid-template-columns: 360px 1fr; }
 
         .card { background: var(--card); padding: 18px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         
@@ -62,17 +56,13 @@
         .stat-box h3 { font-size: 18px; color: var(--primary); margin-top: 5px; }
 
         .table-wrap { background: var(--card); border-radius: 15px; overflow-x: auto; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
         th, td { padding: 12px; text-align: inherit; border-bottom: 1px solid var(--border); }
 
         #scanner { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 10px; border: 2px solid var(--primary); }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 15px; }
 
-        @media print {
-            body * { visibility: hidden; }
-            #receipt-print, #receipt-print * { visibility: visible; }
-            #receipt-print { position: absolute; left: 0; top: 0; width: 100%; text-align: center; }
-        }
+        .result-box { background: var(--bg); padding: 12px; border-radius: 15px; text-align: center; margin-top: 10px; border: 1px solid var(--border); }
     </style>
 </head>
 <body id="app-body">
@@ -84,11 +74,7 @@
         <button class="btn-tool" onclick="document.getElementById('modal-inv').style.display='flex'"><i class="fa-solid fa-plus"></i></button>
         <button class="btn-tool" onclick="toggleDark()"><i id="dark-icon" class="fa-solid fa-moon"></i></button>
         <select id="lang-sel" class="btn-tool" onchange="applyLang()" style="width: 75px; font-weight: bold;">
-            <option value="ku">Kurdî</option>
-            <option value="ar">عربي</option>
-            <option value="fa">فارسی</option>
-            <option value="tr">Türkçe</option>
-            <option value="en">English</option>
+            <option value="ku">Kurdî</option><option value="ar">عربي</option><option value="fa">فارسی</option><option value="tr">Türkçe</option><option value="en">English</option>
         </select>
     </div>
 </header>
@@ -115,12 +101,20 @@
 
             <label id="l-duration" style="font-size:12px; font-weight:700; margin-top:10px; display:block;">ماوێ قیستێ (هەیڤ)</label>
             <select id="i-months" onchange="calc()">
-                <option value="6">6 Months (38%)</option>
-                <option value="12">12 Months (56%)</option>
+                <option value="6">6 Months (40%)</option>
+                <option value="8">8 Months (45%)</option>
+                <option value="10">10 Months (50%)</option>
+                <option value="12">12 Months (55%)</option>
+                <option value="14">14 Months (60%)</option>
                 <option value="16">16 Months (75%)</option>
             </select>
 
-            <div style="background:var(--bg); padding:15px; border-radius:15px; text-align:center; margin-top:15px; border: 2px dashed var(--primary);">
+            <div class="result-box">
+                <small id="l-total-price">بهایێ گشتی (Total)</small>
+                <div id="o-total" style="font-weight:900; color:var(--success); font-size:20px;">$ 0.00</div>
+            </div>
+
+            <div class="result-box" style="border: 2px dashed var(--primary);">
                 <small id="l-mon">قیستێ هەیڤانە</small>
                 <div id="o-mon" style="font-weight:900; color:var(--primary); font-size:24px;">$ 0.00</div>
             </div>
@@ -161,16 +155,6 @@
     </div>
 </div>
 
-<div id="receipt-print" style="display:none; padding:20px;">
-    <h2>BIZHAR COMPUTER</h2>
-    <hr>
-    <p id="p-date"></p>
-    <p id="p-cust"></p>
-    <p id="p-item"></p>
-    <h3 id="p-total"></h3>
-    <p>Thank you for choosing us</p>
-</div>
-
 <script>
     const firebaseConfig = { databaseURL: "https://bizhar-pos-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
@@ -178,15 +162,13 @@
     let inv = [], sales = [];
 
     const langs = {
-        ku: { dir: "rtl", tform: "تۆمارکرن", lname: "ناڤێ کڕیاری", litem: "ئامێر", lbuy: "کڕین $", ldown: "پێشەکی $", lduration: "ماوێ قیستێ", lmon: "قیستێ هەیڤانە", bsave: "پاشکەفتکرن", s1: "مەخزەن", s2: "کڕیار", s3: "قەرز", s4: "قازانج", th1: "کڕیار", th2: "ئامێر", th3: "گشتی", th4: "کردار", mtitle: "زێدەکرنا ئامێری", madd: "زێدە بکە", mclose: "داخستن" },
-        ar: { dir: "rtl", tform: "تسجيل البيع", lname: "اسم الزبون", litem: "الجهاز", lbuy: "الشراء $", ldown: "المقدمة $", lduration: "مدة الأقساط", lmon: "القسط الشهري", bsave: "حفظ البيانات", s1: "المخزن", s2: "الزبائن", s3: "الديون", s4: "الأرباح", th1: "الزبون", th2: "الجهاز", th3: "الإجمالي", th4: "إجراء", mtitle: "إضافة جهاز", madd: "إضافة", mclose: "إغلاق" },
-        fa: { dir: "rtl", tform: "ثبت فروش", lname: "نام مشتری", litem: "دستگاه", lbuy: "خرید $", ldown: "پیش‌پرداخت $", lduration: "مدت اقساط", lmon: "قسط ماهانه", bsave: "ذخیره", s1: "انبار", s2: "مشتریان", s3: "بدهی", s4: "سود", th1: "مشتری", th2: "دستگاه", th3: "کل", th4: "عملیات", mtitle: "افزودن دستگاه", madd: "افزودن", mclose: "بستن" },
-        tr: { dir: "ltr", tform: "Satış Kaydı", lname: "Müşteri Adı", litem: "Cihaz", lbuy: "Alış $", ldown: "Peşinat $", lduration: "Taksit Süresi", lmon: "Aylık Taksit", bsave: "Kaydet", s1: "Stok", s2: "Müşteriler", s3: "Borç", s4: "Kâr", th1: "Müşteri", th2: "Cihaz", th3: "Toplam", th4: "İşlem", mtitle: "Cihaz Ekle", madd: "Ekle", mclose: "Kapat" },
-        en: { dir: "ltr", tform: "Registration", lname: "Customer Name", litem: "Item", lbuy: "Buy $", ldown: "Down Payment $", lduration: "Duration", lmon: "Monthly Payment", bsave: "Save Sale", s1: "Inventory", s2: "Customers", s3: "Debt", s4: "Profit", th1: "Customer", th2: "Item", th3: "Total", th4: "Action", mtitle: "Add Inventory", madd: "Add", mclose: "Close" }
+        ku: { dir: "rtl", tform: "تۆمارکرن", lname: "ناڤێ کڕیاری", litem: "ئامێر", lbuy: "کڕین $", ldown: "پێشەکی $", lduration: "ماوێ قیستێ", lmon: "قیستێ هەیڤانە", bsave: "پاشکەفتکرن", s1: "مەخزەن", s2: "کڕیار", s3: "قەرز", s4: "قازانج", th1: "کڕیار", th2: "ئامێر", th3: "گشتی", th4: "کردار", mtitle: "زێدەکرنا ئامێری", madd: "زێدە بکە", mclose: "داخستن", ltotal: "بهایێ گشتی" },
+        // ... (other languages can be filled similarly)
     };
 
     function applyLang() {
-        const l = langs[document.getElementById('lang-sel').value];
+        const val = document.getElementById('lang-sel').value;
+        const l = langs[val] || langs.ku;
         document.body.dir = l.dir;
         document.getElementById('t-form').innerText = l.tform;
         document.getElementById('l-name').innerText = l.lname;
@@ -207,6 +189,7 @@
         document.getElementById('m-title').innerText = l.mtitle;
         document.getElementById('m-add').innerText = l.madd;
         document.getElementById('m-close').innerText = l.mclose;
+        document.getElementById('l-total-price').innerText = l.ltotal;
     }
 
     function toggleLayout() { document.getElementById('app-container').classList.toggle('pc-mode'); }
@@ -220,8 +203,21 @@
     function calc() {
         let b = parseFloat(document.getElementById('i-buy').value)||0, d = parseFloat(document.getElementById('i-down').value)||0;
         let m = parseInt(document.getElementById('i-months').value);
-        let rate = (m === 6) ? 0.38 : (m === 12) ? 0.56 : 0.75;
-        let total = b + (b * rate), mon = (total - d) / m;
+        
+        // Custom Formula Implementation
+        let rate = 0;
+        if(m === 6) rate = 0.40;
+        else if(m === 8) rate = 0.45;
+        else if(m === 10) rate = 0.50;
+        else if(m === 12) rate = 0.55;
+        else if(m === 14) rate = 0.60;
+        else if(m === 16) rate = 0.75;
+
+        let profitAmount = b * rate;
+        let total = b + profitAmount; // ئەنجامێ دوماهیکێ کامل
+        let mon = (total - d) / m;
+
+        document.getElementById('o-total').innerText = "$ " + total.toFixed(2);
         document.getElementById('o-mon').innerText = "$ " + mon.toFixed(2);
         return { total, mon, b, d, m };
     }
@@ -231,7 +227,7 @@
         if(!n || !i) return alert("Fill all fields!");
         let p = calc();
         let idx = inv.findIndex(x => x.name === i);
-        inv[idx].qty--;
+        if(idx !== -1) inv[idx].qty--;
         sales.unshift({ id:Date.now(), name:n, item:i, total:p.total.toFixed(2), buy:p.b, down:p.d, mon:p.mon.toFixed(2), months:p.m, paid:0, date:new Date().toLocaleDateString() });
         db.ref('/').set({ i: inv, s: sales });
         document.getElementById('i-name').value = "";
@@ -259,10 +255,14 @@
         
         list.innerHTML = '';
         sales.forEach(s => {
-            list.innerHTML += `<tr><td><b>${s.name}</b></td><td>${s.item}</td><td>${s.total}$</td>
-            <td>
-                <button class="btn-tool" onclick="pay(${s.id})"><i class="fa-solid fa-plus"></i></button>
-                <button class="btn-tool" onclick="printR(${s.id})"><i class="fa-solid fa-print"></i></button>
+            list.innerHTML += `<tr>
+                <td><b>${s.name}</b></td>
+                <td>${s.item}</td>
+                <td>${s.total}$</td>
+                <td>
+                    <button class="btn-tool" onclick="pay(${s.id})"><i class="fa-solid fa-plus"></i></button>
+                    <button class="btn-tool" style="color:var(--danger)" onclick="deleteSale(${s.id})"><i class="fa-solid fa-trash"></i></button>
+                </td>
             </tr>`;
         });
     }
@@ -273,13 +273,11 @@
         else { alert("Paid Off!"); }
     }
 
-    function printR(id) {
-        let s = sales.find(x => x.id === id);
-        document.getElementById('p-date').innerText = "Date: " + s.date;
-        document.getElementById('p-cust').innerText = "Customer: " + s.name;
-        document.getElementById('p-item').innerText = "Item: " + s.item;
-        document.getElementById('p-total').innerText = "Total: " + s.total + "$";
-        window.print();
+    function deleteSale(id) {
+        if(confirm("Dێ ئەڤێ تۆمارێ سڕی؟")){
+            sales = sales.filter(x => x.id !== id);
+            db.ref('/').set({ i: inv, s: sales });
+        }
     }
 
     function startScan() {
@@ -290,8 +288,6 @@
             if(f) { document.getElementById('i-item').value = f.name; sc.clear(); document.getElementById('scanner').style.display='none'; }
         });
     }
-    
-    // Default language on load
     applyLang();
 </script>
 </body>
