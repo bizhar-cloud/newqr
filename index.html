@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BIZHAR COMPUTER | ELITE POS</title>
+    <title>BIZHAR COMPUTER | ULTIMATE POS</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -11,304 +11,301 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&family=Outfit:wght@600;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap');
 
         :root {
-            --bg: #f3f6f9; 
-            --card: #ffffff; 
-            --text: #1a1a1b; 
-            --primary: #2563eb; 
-            --accent: #4f46e5;
-            --border: #d1d5db;
-            --header-bg: #ffffff;
+            --bg: #f3f4f6; --card: #ffffff; --text: #111827; --primary: #2563eb; --border: #d1d5db; --success: #10b981;
         }
 
         body.dark-mode {
-            --bg: #0b0e14; 
-            --card: #1a1f26; 
-            --text: #ffffff; 
-            --primary: #3b82f6; 
-            --accent: #6366f1;
-            --border: #334155;
-            --header-bg: #1a1f26;
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #3b82f6; --border: #334155; --success: #34d399;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Noto Sans Arabic', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: background 0.3s; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; transition: 0.2s; }
+        body { font-family: 'Noto Sans Arabic', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
-        /* FIXED & VISIBLE HEADER */
+        /* Navigation Bar */
         header { 
-            background: var(--header-bg); 
-            height: 70px;
-            padding: 0 20px; 
-            border-bottom: 3px solid var(--primary);
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            position: sticky; 
-            top: 0; 
-            z-index: 9999;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            background: var(--card); height: 65px; padding: 0 15px; border-bottom: 3px solid var(--primary);
+            display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .brand-name { 
-            font-family: 'Outfit', sans-serif;
-            font-weight: 900; 
-            font-size: 20px; 
-            color: var(--primary); 
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .brand { font-weight: 900; font-size: 16px; color: var(--primary); text-transform: uppercase; }
+
+        .tools { display: flex; align-items: center; gap: 8px; }
+
+        .btn-icon { 
+            width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); 
+            background: var(--card); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
 
-        .nav-tools { display: flex; align-items: center; gap: 15px; }
-
-        #lang-sel {
-            padding: 8px 10px;
-            border-radius: 12px;
-            border: 2px solid var(--primary);
-            background: var(--card);
-            color: var(--text);
-            font-weight: 800;
-            outline: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .theme-btn {
-            width: 45px;
-            height: 45px;
-            border-radius: 14px;
-            border: 2px solid var(--border);
-            background: var(--card);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        /* MAIN LAYOUT */
-        .container { max-width: 1400px; margin: 20px auto; padding: 0 15px; display: grid; grid-template-columns: 1fr; gap: 25px; }
-        @media (min-width: 1024px) { .container { grid-template-columns: 400px 1fr; } }
-
-        .glass-card { 
-            background: var(--card); 
-            padding: 25px; 
-            border-radius: 25px; 
-            border: 1px solid var(--border); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
-        }
-
-        .form-label { display: block; font-size: 13px; margin-bottom: 8px; font-weight: 900; color: var(--text); text-transform: uppercase; }
+        /* Layout Container */
+        .container { max-width: 1400px; margin: 15px auto; padding: 0 12px; display: grid; gap: 20px; }
         
+        /* Responsive Grid Logic */
+        .container.pc-mode { grid-template-columns: 380px 1fr; }
+        .container.mobile-mode { grid-template-columns: 1fr; }
+        @media (min-width: 1024px) { .container { grid-template-columns: 380px 1fr; } }
+
+        .card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; }
+        
+        .section-title { font-weight: 900; margin-bottom: 15px; border-right: 4px solid var(--primary); padding-right: 10px; font-size: 14px; }
+
         input, select { 
-            width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 15px; 
-            background: var(--bg); color: var(--text); font-size: 16px; outline: none; margin-bottom: 15px;
+            width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; 
+            background: var(--bg); color: var(--text); font-size: 15px; margin-top: 6px; outline: none;
         }
-        input:focus { border-color: var(--primary); background: var(--card); }
+        input:focus { border-color: var(--primary); }
 
-        .btn-action { 
-            width: 100%; padding: 18px; border: none; border-radius: 18px; font-weight: 900; 
-            cursor: pointer; background: linear-gradient(135deg, var(--primary), var(--accent)); 
-            color: white; font-size: 17px; display: flex; align-items: center; justify-content: center; gap: 10px;
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        .primary-btn { 
+            width: 100%; padding: 15px; border: none; border-radius: 15px; font-weight: 900; 
+            background: var(--primary); color: white; margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
 
-        /* DASHBOARD STATS */
-        .dashboard { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
-        @media (min-width: 768px) { .dashboard { grid-template-columns: repeat(5, 1fr); } }
-        .stat-box { background: var(--card); padding: 20px; border-radius: 22px; text-align: center; border: 1px solid var(--border); border-bottom: 5px solid var(--primary); }
-        .stat-box h3 { margin: 10px 0 0; font-size: 20px; font-weight: 900; color: var(--primary); }
-        .stat-box.profit { border-bottom-color: #10b981; }
-        .stat-box.profit h3 { color: #10b981; }
+        /* Dashboard Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        @media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+        .stat-card { background: var(--card); padding: 15px; border-radius: 18px; text-align: center; border-bottom: 4px solid var(--primary); }
+        .stat-card h3 { font-size: 20px; color: var(--primary); font-weight: 900; }
 
-        /* TABLE DESIGN */
-        .table-container { background: var(--card); border-radius: 25px; overflow: hidden; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { background: rgba(0,0,0,0.04); padding: 20px; text-align: inherit; font-weight: 900; font-size: 14px; border-bottom: 2px solid var(--border); }
-        td { padding: 18px; border-bottom: 1px solid var(--border); font-size: 15px; }
+        /* Table Style */
+        .table-area { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+        .scroll-box { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { background: rgba(0,0,0,0.03); padding: 15px; text-align: inherit; font-weight: 800; font-size: 13px; }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
-        /* SCANNER BUTTON */
-        .scanner-trigger {
-            position: absolute; left: 10px; top: 35px; background: var(--primary); color: white;
-            border: none; border-radius: 12px; width: 40px; height: 40px; cursor: pointer; z-index: 10;
+        /* Scanner Modal */
+        #scanner-view { width: 100%; border-radius: 15px; overflow: hidden; display: none; margin-bottom: 15px; border: 3px solid var(--primary); }
+
+        /* Settings Overlay */
+        #settings-panel { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;
         }
-        [dir="ltr"] .scanner-trigger { left: auto; right: 10px; }
     </style>
 </head>
-<body id="main-app">
+<body id="app-root">
 
 <header>
-    <div class="brand-name">BIZHAR COMPUTER</div>
-    <div class="nav-tools">
-        <select id="lang-sel" onchange="applyLang()">
-            <option value="ku">Kurdî</option>
-            <option value="en">English</option>
-            <option value="ar">العربية</option>
-            <option value="tr">Türkçe</option>
+    <div class="brand">BIZHAR COMPUTER</div>
+    <div class="tools">
+        <button class="btn-icon" onclick="toggleView()" title="Switch View"><i class="fa-solid fa-display"></i></button>
+        <button class="btn-icon" onclick="openSettings()" title="Inventory"><i class="fa-solid fa-boxes-stacked"></i></button>
+        <button class="btn-icon" onclick="toggleDarkMode()"><i id="mode-icon" class="fa-solid fa-moon"></i></button>
+        <select id="lang-picker" onchange="changeLang()" style="width: 65px; margin: 0; padding: 5px;">
+            <option value="ku">KU</option><option value="en">EN</option><option value="ar">AR</option>
         </select>
-        <button onclick="toggleTheme()" class="theme-btn" id="theme-btn">
-            <i class="fa-solid fa-moon"></i>
-        </button>
     </div>
 </header>
 
-<div class="container">
-    <div class="entry-sidebar">
-        <div class="glass-card">
-            <h2 id="form-title" style="margin-top:0; color: var(--primary);">تۆمارکرنا وەسڵێ</h2>
+<div class="container" id="main-grid">
+    <div class="sidebar">
+        <div class="card">
+            <h2 class="section-title" id="t-sales">تۆمارکرنا وەسڵێ</h2>
             
-            <div id="reader" style="display:none; margin-bottom:15px; border-radius:15px; overflow:hidden;"></div>
+            <div id="scanner-view"></div>
 
-            <div style="position:relative">
-                <label class="form-label" id="lbl-name">ناڤێ کڕیاری</label>
-                <input type="text" id="in-name" placeholder="...">
-            </div>
-            
-            <div style="position:relative">
-                <label class="form-label" id="lbl-item">ئامێر</label>
-                <select id="in-item"></select>
-                <button class="scanner-trigger" onclick="startScanner()"><i class="fa-solid fa-barcode"></i></button>
+            <div style="margin-bottom: 15px;">
+                <label id="l-name" style="font-size: 12px; font-weight: 800;">ناڤێ کڕیاری</label>
+                <input type="text" id="cust-name" placeholder="...">
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div><label class="form-label" id="lbl-buy">بها $</label><input type="number" id="in-buy" oninput="runFin()"></div>
-                <div><label class="form-label" id="lbl-down">پێشەکی $</label><input type="number" id="in-down" oninput="runFin()"></div>
+            <div style="margin-bottom: 15px;">
+                <label id="l-item" style="font-size: 12px; font-weight: 800;">ئامێر</label>
+                <div style="display: flex; gap: 8px; margin-top: 5px;">
+                    <select id="item-picker"></select>
+                    <button class="btn-icon" onclick="startCamera()" style="background: var(--primary); color: white;"><i class="fa-solid fa-barcode"></i></button>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" id="lbl-m">ماوە (Months)</label>
-                <select id="in-months" onchange="runFin()">
-                    <option value="6">6 Months (38%)</option>
-                    <option value="12">12 Months (56%)</option>
-                    <option value="16">16 Months (75%)</option>
-                </select>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div><label id="l-buy" style="font-size: 11px; font-weight: 700;">بها $</label><input type="number" id="val-buy" oninput="doCalc()"></div>
+                <div><label id="l-down" style="font-size: 11px; font-weight: 700;">پێشەکی $</label><input type="number" id="val-down" oninput="doCalc()"></div>
             </div>
 
-            <div style="background: var(--bg); padding: 25px; border-radius: 20px; text-align: center; margin-bottom: 25px; border: 2px dashed var(--primary);">
-                <small id="lbl-mon" style="font-weight:900; opacity:0.6">قیستێ هەیڤانە</small>
-                <div id="out-monthly" style="font-size: 32px; font-weight: 900; color: var(--primary);">$ 0.00</div>
+            <div style="background: var(--bg); padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; border: 2px dashed var(--primary);">
+                <small id="l-monthly" style="font-weight: 700; opacity: 0.7;">قیستێ هەیڤانە</small>
+                <div id="out-mon" style="font-size: 28px; font-weight: 900; color: var(--primary);">$ 0.00</div>
             </div>
 
-            <button class="btn-action" onclick="saveSale()"><i class="fa-solid fa-cloud-arrow-up"></i> <span id="btn-save">پاشکەفتکرن</span></button>
+            <button class="primary-btn" onclick="saveTransaction()"><i class="fa-solid fa-file-invoice-dollar"></i> <span id="btn-save">پاشکەفتکرن</span></button>
         </div>
     </div>
 
-    <div class="data-view">
-        <div class="dashboard">
-            <div class="stat-box"><small id="s1">مەخزەن</small><h3 id="v1">0</h3></div>
-            <div class="stat-box"><small id="s2">کڕیار</small><h3 id="v2">0</h3></div>
-            <div class="stat-box"><small id="s3">قەرز</small><h3 id="v3">0$</h3></div>
-            <div class="stat-box"><small id="s4">داهات</small><h3 id="v4">0$</h3></div>
-            <div class="stat-box profit"><small id="s5">قازانج</small><h3 id="v5">0$</h3></div>
+    <div class="content">
+        <div class="stats-grid">
+            <div class="stat-card"><small id="s-inv">مەخزەن</small><h3 id="v-inv">0</h3></div>
+            <div class="stat-card"><small id="s-cust">کڕیار</small><h3 id="v-cust">0</h3></div>
+            <div class="stat-card"><small id="s-debt">قەرز</small><h3 id="v-debt">0$</h3></div>
+            <div class="stat-card" style="border-color: var(--success);"><small id="s-pro">قازانج</small><h3 id="v-pro" style="color: var(--success);">0$</h3></div>
         </div>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr><th id="th1">کڕیار</th><th id="th2">ئامێر</th><th id="th3">گشتی</th><th id="th4">باقی</th><th id="th5">کردار</th></tr>
-                </thead>
-                <tbody id="sales-list"></tbody>
-            </table>
+        <div class="table-area">
+            <div class="scroll-box">
+                <table>
+                    <thead>
+                        <tr><th id="th-n">کڕیار</th><th id="th-i">ئامێر</th><th id="th-t">گشتی</th><th id="th-r">باقی</th><th id="th-a">کردار</th></tr>
+                    </thead>
+                    <tbody id="sales-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="settings-panel">
+    <div class="card" style="width: 100%; max-width: 450px;">
+        <h2 class="section-title">ڕێکخستنا مەخزەنی</h2>
+        <div class="form-group">
+            <label>ناڤێ ئامێری</label><input type="text" id="new-item-name">
+            <label>بارکۆد</label><input type="text" id="new-item-code">
+            <label>کۆمیت (Qty)</label><input type="number" id="new-item-qty">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button class="primary-btn" onclick="addToInv()" style="background: var(--success);">زێدە بکە</button>
+            <button class="primary-btn" onclick="closeSettings()" style="background: #64748b;">داخستن</button>
         </div>
     </div>
 </div>
 
 <script>
+    // Configuration
     const firebaseConfig = { databaseURL: "https://bizhar-pos-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    
     let inventory = [], sales = [];
 
-    const lex = {
-        ku: { dir: "rtl", name: "ناڤێ کڕیاری", item: "ئامێر", buy: "بهایێ کڕینێ", down: "پێشەکی", m: "ماوێ قیستێ", mon: "قیستێ هەیڤانە", save: "پاشکەفتکرن", s1: "مەخزەن", s5: "قازانج", th1: "کڕیار" },
-        en: { dir: "ltr", name: "Customer Name", item: "Device", buy: "Cost Price", down: "Down Payment", m: "Months", mon: "Monthly Payment", save: "Save Sale", s1: "Stock", s5: "Profit", th1: "Customer" }
+    // Language Data
+    const dict = {
+        ku: { dir: "rtl", name: "ناڤێ کڕیاری", item: "ئامێر", buy: "بهایێ کڕینێ", down: "پێشەکی", mon: "قیستێ هەیڤانە", save: "پاشکەفتکرن", s1: "مەخزەن", s2: "کڕیار", s3: "قەرز", s4: "قازانج" },
+        en: { dir: "ltr", name: "Customer Name", item: "Device", buy: "Cost Price", down: "Down Payment", mon: "Monthly", save: "Save Sale", s1: "Stock", s2: "Clients", s3: "Debt", s4: "Profit" }
     };
 
-    function applyLang() {
-        const l = document.getElementById('lang-sel').value;
-        const t = (l === 'en' || l === 'tr') ? lex.en : lex.ku;
-        document.getElementById('main-app').dir = t.dir;
-        document.getElementById('lbl-name').innerText = t.name;
-        document.getElementById('lbl-item').innerText = t.item;
-        document.getElementById('lbl-buy').innerText = t.buy;
-        document.getElementById('lbl-down').innerText = t.down;
-        document.getElementById('lbl-m').innerText = t.m;
-        document.getElementById('lbl-mon').innerText = t.mon;
+    function changeLang() {
+        const l = document.getElementById('lang-picker').value;
+        const t = (l === 'en') ? dict.en : dict.ku;
+        document.getElementById('app-root').dir = t.dir;
+        document.getElementById('l-name').innerText = t.name;
+        document.getElementById('l-item').innerText = t.item;
+        document.getElementById('l-buy').innerText = t.buy;
+        document.getElementById('l-down').innerText = t.down;
+        document.getElementById('l-monthly').innerText = t.mon;
         document.getElementById('btn-save').innerText = t.save;
-        document.getElementById('s1').innerText = t.s1; document.getElementById('s5').innerText = t.s5;
-        document.getElementById('th1').innerText = t.th1;
-        syncUI();
+        document.getElementById('s-inv').innerText = t.s1; document.getElementById('s-cust').innerText = t.s2;
+        document.getElementById('s-debt').innerText = t.s3; document.getElementById('s-pro').innerText = t.s4;
+        refreshUI();
     }
 
-    db.ref('/').on('value', snap => { const d = snap.val(); if(d){ inventory=d.i||[]; sales=d.s||[]; syncUI(); } });
+    // Sync with Firebase
+    db.ref('/').on('value', snap => {
+        const data = snap.val();
+        if(data) {
+            inventory = data.i || [];
+            sales = data.s || [];
+            refreshUI();
+        }
+    });
 
-    function runFin() {
-        let b = parseFloat(document.getElementById('in-buy').value)||0, d = parseFloat(document.getElementById('in-down').value)||0, m = parseInt(document.getElementById('in-months').value);
-        let rate = {6:0.38, 12:0.56, 16:0.75}[m];
-        let total = b + (b * rate), mon = (total - d) / m;
-        document.getElementById('out-monthly').innerText = "$ " + mon.toFixed(2);
-        return { total, mon, d, m, b };
+    function doCalc() {
+        let b = parseFloat(document.getElementById('val-buy').value) || 0;
+        let d = parseFloat(document.getElementById('val-down').value) || 0;
+        let total = b + (b * 0.38); // Standard 38% for Bizhar system
+        let mon = (total - d) / 6;
+        document.getElementById('out-mon').innerText = "$ " + mon.toFixed(2);
+        return { total, mon, b, d };
     }
 
-    function saveSale() {
-        let n = document.getElementById('in-name').value, i = document.getElementById('in-item').value;
-        if(!n || !i) return alert("Hemiya pire bike!");
-        let p = runFin();
-        let idx = inventory.findIndex(x => x.name === i);
-        inventory[idx].qty--;
-        sales.unshift({ id:Date.now(), name:n, item:i, total:p.total.toFixed(2), buy:p.b, down:p.d, mon:p.mon.toFixed(2), months:p.m, paid:0, date:new Date().toLocaleDateString() });
-        db.ref('/').set({ i: inventory, s: sales });
-        document.getElementById('in-name').value = "";
+    function saveTransaction() {
+        let name = document.getElementById('cust-name').value;
+        let item = document.getElementById('item-picker').value;
+        if(!name || !item) return alert("Hemiya pire bike!");
+
+        let p = doCalc();
+        let idx = inventory.findIndex(x => x.name === item);
+        if(inventory[idx].qty > 0) {
+            inventory[idx].qty--;
+            sales.unshift({ 
+                id: Date.now(), name, item, total: p.total.toFixed(2), 
+                buy: p.b, down: p.d, mon: p.mon.toFixed(2), paid: 0, date: new Date().toLocaleDateString() 
+            });
+            db.ref('/').set({ i: inventory, s: sales });
+            document.getElementById('cust-name').value = "";
+        } else {
+            alert("Ev amêra د مەخزەنی دا نەماوە!");
+        }
     }
 
-    function syncUI() {
-        document.getElementById('v1').innerText = inventory.reduce((a,b)=>a+b.qty,0);
-        document.getElementById('v2').innerText = sales.length;
-        let dbt=0, inc=0, pro=0;
-        sales.forEach(s => { 
-            let p_v = parseFloat(s.down)+(s.paid*parseFloat(s.mon)); inc+=p_v; dbt+=(parseFloat(s.total)-p_v);
+    function addToInv() {
+        let n = document.getElementById('new-item-name').value;
+        let c = document.getElementById('new-item-code').value;
+        let q = parseInt(document.getElementById('new-item-qty').value);
+        if(n && q) {
+            inventory.push({ name: n, barcode: c, qty: q });
+            db.ref('/').set({ i: inventory, s: sales });
+            closeSettings();
+        }
+    }
+
+    function refreshUI() {
+        document.getElementById('v-inv').innerText = inventory.reduce((a,b) => a + b.qty, 0);
+        document.getElementById('v-cust').innerText = sales.length;
+        
+        let dbt = 0, pro = 0;
+        sales.forEach(s => {
+            let remain = parseFloat(s.total) - parseFloat(s.down) - (s.paid * parseFloat(s.mon));
+            dbt += remain;
             pro += (parseFloat(s.total) - parseFloat(s.buy));
         });
-        document.getElementById('v3').innerText = dbt.toFixed(1) + "$";
-        document.getElementById('v4').innerText = inc.toFixed(1) + "$";
-        document.getElementById('v5').innerText = pro.toFixed(1) + "$";
+        document.getElementById('v-debt').innerText = dbt.toFixed(1) + "$";
+        document.getElementById('v-pro').innerText = pro.toFixed(1) + "$";
 
-        let sel = document.getElementById('in-item'), tb = document.getElementById('sales-list');
-        sel.innerHTML = '<option value="">...</option>'; 
-        inventory.forEach(x => { if(x.qty>0) sel.innerHTML += `<option value="${x.name}">${x.name}</option>`; });
-        
-        tb.innerHTML = '';
+        let sel = document.getElementById('item-picker');
+        sel.innerHTML = '<option value="">Hلبژێرە...</option>';
+        inventory.forEach(x => {
+            if(x.qty > 0) sel.innerHTML += `<option value="${x.name}">${x.name} (${x.qty})</option>`;
+        });
+
+        let list = document.getElementById('sales-list');
+        list.innerHTML = '';
         sales.forEach(s => {
             let rem = (parseFloat(s.total) - parseFloat(s.down) - (s.paid * parseFloat(s.mon))).toFixed(1);
-            tb.innerHTML += `<tr>
+            list.innerHTML += `<tr>
                 <td><b>${s.name}</b></td><td>${s.item}</td><td>${s.total}$</td>
                 <td style="color:${rem>0?'#ef4444':'#10b981'}"><b>${rem}$</b></td>
-                <td><button class="theme-btn" style="width:35px; height:35px;" onclick="payUp(${s.id})"><i class="fa-solid fa-plus"></i></button></td>
+                <td><button class="btn-icon" onclick="payInst(${s.id})"><i class="fa-solid fa-plus"></i></button></td>
             </tr>`;
         });
     }
 
-    function payUp(id) { let s=sales.find(x=>x.id===id); if(s.paid < s.months){ s.paid++; db.ref('/').set({i:inventory, s:sales}); } }
-
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        const icon = document.querySelector('#theme-btn i');
-        icon.className = document.body.classList.contains('dark-mode') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    function payInst(id) {
+        let s = sales.find(x => x.id === id);
+        if(s.paid < 6) { s.paid++; db.ref('/').set({ i: inventory, s: sales }); }
     }
 
-    function startScanner() {
-        document.getElementById('reader').style.display = 'block';
-        let sc = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250 });
+    // Toggle Helpers
+    function toggleView() { document.getElementById('main-grid').classList.toggle('mobile-mode'); }
+    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+    function openSettings() { document.getElementById('settings-panel').style.display = 'flex'; }
+    function closeSettings() { document.getElementById('settings-panel').style.display = 'none'; }
+
+    // Scanner Logic
+    function startCamera() {
+        document.getElementById('scanner-view').style.display = 'block';
+        let sc = new Html5QrcodeScanner("scanner-view", { fps: 15, qrbox: 250 });
         sc.render((txt) => {
-            const item = inventory.find(x => x.barcode === txt || x.name === txt);
-            if(item) { document.getElementById('in-item').value = item.name; sc.clear(); document.getElementById('reader').style.display = 'none'; }
+            let found = inventory.find(x => x.barcode === txt || x.name === txt);
+            if(found) {
+                document.getElementById('item-picker').value = found.name;
+                sc.clear();
+                document.getElementById('scanner-view').style.display = 'none';
+            }
         });
     }
 
-    window.onload = applyLang;
+    window.onload = changeLang;
 </script>
 </body>
 </html>
