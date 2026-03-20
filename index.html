@@ -44,11 +44,23 @@
             position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow);
         }
 
-        .brand img { height: 50px; width: 50px; border-radius: 12px; object-fit: cover; border: 1.5px solid var(--neon-blue); box-shadow: 0 0 10px rgba(0,210,255,0.3); }
+        /* 4D Static Neon Logo Effect (Shine Removed) */
+        .brand h2 { 
+            font-weight: 900; 
+            font-size: 22px;
+            background: linear-gradient(135deg, #00d2ff, #bd00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+            text-transform: uppercase;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+            letter-spacing: 1px;
+        }
 
         .settings-btn { width: 45px; height: 45px; border-radius: 12px; background: var(--bg); color: var(--neon-blue); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1.5px solid var(--neon-blue); font-size: 20px; transition: 0.3s; }
 
-        /* Menu */
+        /* Menu Overlay */
         .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10000; }
         .menu-overlay.show { display: flex; }
         .dropdown-menu { background: var(--card); border-radius: 30px; width: 340px; padding: 25px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); border: 2px solid var(--neon-blue); max-height: 90vh; overflow-y: auto; }
@@ -89,7 +101,7 @@
 
 <div id="login-overlay">
     <div class="login-box">
-        <img src="https://i.postimg.cc/3WMQdH2P/17ABF58A-85E9-4C1A-B6DD-97977E81AA3C.jpg" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 15px;">
+        <img src="https://i.postimg.cc/nV1HLXWy/EFAC45A5-C196-48E5-913E-A27706778B90.jpg" style="width: 100%; border-radius: 20px; margin-bottom: 20px;">
         <h2 id="log-t" style="color:var(--neon-blue); margin-bottom:20px; font-weight: 900;">Installments POS</h2>
         <input type="text" id="login-user" placeholder="USERNAME">
         <input type="password" id="login-pass" placeholder="PASSWORD">
@@ -99,7 +111,9 @@
 
 <header>
     <div style="width: 45px;"></div>
-    <div class="brand"><img src="https://i.postimg.cc/3WMQdH2P/17ABF58A-85E9-4C1A-B6DD-97977E81AA3C.jpg" alt="Logo"></div>
+    <div class="brand">
+        <h2>Installments POS</h2>
+    </div>
     <button class="settings-btn" onclick="toggleMenu()"><i class="fa-solid fa-bars"></i></button>
 </header>
 
@@ -149,7 +163,7 @@
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
-                <div><label id="l-buy">COST $</label><input type="number" id="i-buy" oninput="calc()"></div>
+                <div><label id="l-buy">SELLING PRICE $</label><input type="number" id="i-buy" oninput="calc()"></div>
                 <div><label id="l-down">DOWNPAY $</label><input type="number" id="i-down" oninput="calc()"></div>
             </div>
 
@@ -216,12 +230,12 @@
     const SECRET_KEY = "07503644666";
 
     const translations = {
-        bd: { dir: "rtl", mhead: "مینیو", tform: "فرۆشتنا نوی", lname: "ناڤێ کڕیاری", litem: "ئامێر", lbuy: "بهایێ کڕینێ", ldown: "پێشەکی", lduration: "ماوێ قیستێ", lmon: "قیست", ltotal: "کۆم", bsave: "تۆمارکرن", s1: "کۆگە", s4: "قازانج", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "مەخزەن", bclose: "داخستن", search: "لێگەریان...", inv_name: "ناڤێ ئامێری", inv_barcode: "بارکۆد", inv_qty: "دانە", inv_add: "زێدەکرن", marchive: "ئەڕشیف", mtrash: "گلێش", mbackup: "باکئەپ", mreports: "ڕاپۆرت", mabout: "دەربارەی سیستەمی", mlogout: "چوونەدەر", mpc: "شاشا کومپیتەری", mdark: "شەڤ", log_btn: "چوونە ژوور", log_u: "ناڤێ بکارهێنەری", log_p: "کۆد", about_txt: "ئەڤ سیستەمە هاتیە دروستکرن ژ لایێ <b>بژار ڕەشید</b> ڤە بۆ بڕێڤەبرنا کارێن قیست و فرۆشتنێ ب شێوازەکێ هوشمەند.", th_date: "رێکەفت", th_amt: "بڕ" },
-        sr: { dir: "rtl", mhead: "مینیو", tform: "فرۆشتنی نوێ", lname: "ناوی کڕیار", litem: "ئامێر", lbuy: "نرخی کڕین", ldown: "پێشەکی", lduration: "ماوە", lmon: "قیست", ltotal: "کۆم", bsave: "پاشەکەوت", s1: "کۆگا", s4: "قازانج", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "کۆگا", bclose: "داخستن", search: "گەڕان...", inv_name: "ناوی کاڵا", inv_barcode: "بارکۆد", inv_qty: "ژمارە", inv_add: "زیادکردن", marchive: "ئەرشیف", mtrash: "تەنەکەی خۆڵ", mbackup: "باکئەپ", mreports: "ڕاپۆرتەکان", mabout: "دەربارەی سیستم", mlogout: "چوونەدەرەوە", mpc: "شاشەی کۆمپیوتەر", mdark: "شەو", log_btn: "چوونەژوورەوە", log_u: "ناوی بەکارهێنەر", log_p: "کۆد", about_txt: "ئەم سیستمە لەلایەن <b>بژار ڕەشید</b> گەشەی پێدراوە بۆ بەڕێوەبردنی قیست و فرۆشتن بە شێوازێکی پێشکەوتوو.", th_date: "بەروار", th_amt: "بڕ" },
-        ar: { dir: "rtl", mhead: "القائمة", tform: "بيع جديد", lname: "اسم الزبون", litem: "الجهاز", lbuy: "التكلفة", ldown: "المقدمة", lduration: "المدة", lmon: "القسط", ltotal: "المجموع", bsave: "حفظ", s1: "المخزن", s4: "الأرباح", th1: "الزبون", th2: "الجهاز", th3: "المجموع", th_down: "مقدمة", th4: "الأقساط", th5: "إجراء", madd: "المخزن", bclose: "إغلاق", search: "بحث...", inv_name: "المادة", inv_barcode: "بارکود", inv_qty: "الكمية", inv_add: "إضافة", marchive: "الأرشيف", mtrash: "المحذوفات", mbackup: "نسخ احتياطي", mreports: "التقارير", mabout: "حول المطور", mlogout: "تسجيل الخروج", mpc: "وضع الحاسوب", mdark: "الوضع الليلي", log_btn: "دخول", log_u: "اسم المستخدم", log_p: "كلمة المرور", about_txt: "تم تطوير هذا النظام بواسطة <b>بژار رشید</b> لإدارة المبيعات والأقساط بطريقة حديثة.", th_date: "التاريخ", th_amt: "المبلغ" },
-        en: { dir: "ltr", mhead: "MENU", tform: "NEW SALE", lname: "CUSTOMER NAME", litem: "ITEM", lbuy: "COST", ldown: "DOWNPAY", lduration: "PLAN", lmon: "MONTHLY", ltotal: "TOTAL", bsave: "SAVE", s1: "STOCK", s4: "PROFIT", th1: "NAME", th2: "ITEM", th3: "TOTAL", th_down: "DOWN", th4: "PAID", th5: "ACTION", madd: "INVENTORY", bclose: "CLOSE", search: "Search...", inv_name: "Item Name", inv_barcode: "Barcode", inv_qty: "Qty", inv_add: "Add", marchive: "Archive", mtrash: "Trash", mbackup: "Backup", mreports: "Reports", mabout: "About", mlogout: "Logout", mpc: "PC Mode", mdark: "Dark Mode", log_btn: "LOGIN", log_u: "USERNAME", log_p: "PASSWORD", about_txt: "Developed by <b>BIZHAR RASHEED</b> for modern management.", th_date: "Date", th_amt: "Amount" },
-        tr: { dir: "ltr", mhead: "MENÜ", tform: "YENİ SATIŞ", lname: "MÜŞTERİ ADI", litem: "ÜRÜN", lbuy: "MALİYET", ldown: "PEŞİNAT", lduration: "VADE", lmon: "TAKSİT", ltotal: "TOPLAM", bsave: "KAYDET", s1: "STOK", s4: "KÂR", th1: "AD", th2: "ÜRÜN", th3: "TOPLAM", th_down: "PEŞİN", th4: "ÖDENEN", th5: "İŞLEM", madd: "ENVANTER", bclose: "KAPAT", search: "Ara...", inv_name: "Ürün Adı", inv_barcode: "Barkod", inv_qty: "Adet", inv_add: "Ekle", marchive: "Arşiv", mtrash: "Çöp Kutusu", mbackup: "Yedekle", mreports: "Raporlar", mabout: "Hakkında", mlogout: "Çıkış Yap", mpc: "Masaüstü", mdark: "Gece Modu", log_btn: "GİRİŞ", log_u: "KULLANICI", log_p: "ŞİFRE", about_txt: "Bu sistem <b>BİZHAR RAŞİD</b> tarafından geliştirilmiştir.", th_date: "Tarih", th_amt: "Miktar" },
-        fa: { dir: "rtl", mhead: "منو", tform: "فروش جدید", lname: "نام مشتری", litem: "کالا", lbuy: "هزینه", ldown: "پیش‌پرداخت", lduration: "مدت", lmon: "قسط", ltotal: "مجموع", bsave: "ذخیره", s1: "انبار", s4: "سود", th1: "نام", th2: "کالا", th3: "مجموع", th_down: "پیش‌پرداخت", th4: "اقساط", th5: "عملیات", madd: "موجودی", bclose: "بستن", search: "جستجو...", inv_name: "نام کالا", inv_barcode: "بارکد", inv_qty: "تعداد", inv_add: "افزودن", marchive: "آرشیو", mtrash: "زباله", mbackup: "پشتیبان", mreports: "گزارش‌ها", mabout: "درباره ما", mlogout: "خروج", mpc: "حالت دسکتاپ", mdark: "حالت شب", log_btn: "ورود", log_u: "نام کاربری", log_p: "رمز عبور", about_txt: "این سیستم توسط <b>بژار رشید</b> طراحی شده است.", th_date: "تاریخ", th_amt: "مبلغ" }
+        bd: { dir: "rtl", mhead: "مینیو", tform: "فرۆشتنا نوی", lname: "ناڤێ کڕیاری", litem: "ئامێر", lbuy: "بهایێ فرۆتنێ", ldown: "پێشەکی", lduration: "ماوێ قیستێ", lmon: "قیست", ltotal: "کۆم", bsave: "تۆمارکرن", s1: "کۆگە", s4: "قازانج", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "مەخزەن", bclose: "داخستن", search: "لێگەریان...", inv_name: "ناڤێ ئامێری", inv_barcode: "بارکۆد", inv_qty: "دانە", inv_add: "زێدەکرن", marchive: "ئەڕشیف", mtrash: "گلێش", mbackup: "باکئەپ", mreports: "ڕاپۆرت", mabout: "دەربارەی سیستەمی", mlogout: "چوونەدەر", mpc: "شاشا کومپیتەری", mdark: "شەڤ", log_btn: "چوونە ژوور", log_u: "ناڤێ بکارهێنەری", log_p: "کۆد", about_txt: "ئەڤ سیستەمە هاتیە دروستکرن ژ لایێ <b>بژار ڕەشید</b> ڤە بۆ بڕێڤەبرنا کارێن قیست و فرۆشتنێ ب شێوازەکێ هوشمەند.", th_date: "رێکەفت", th_amt: "بڕ" },
+        sr: { dir: "rtl", mhead: "مینیو", tform: "فرۆشتنی نوێ", lname: "ناوی کڕیار", litem: "ئامێر", lbuy: "نرخی فرۆشتن", ldown: "پێشەکی", lduration: "ماوە", lmon: "قیست", ltotal: "کۆم", bsave: "پاشەکەوت", s1: "کۆگا", s4: "قازانج", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "کۆگا", bclose: "داخستن", search: "گەڕان...", inv_name: "ناوی کاڵا", inv_barcode: "بارکۆد", inv_qty: "ژمارە", inv_add: "زیادکردن", marchive: "ئەرشیف", mtrash: "تەنەکەی خۆڵ", mbackup: "باکئەپ", mreports: "ڕاپۆرتەکان", mabout: "دەربارەی سیستم", mlogout: "چوونەدەرەوە", mpc: "شاشەی کۆمپیوتەر", mdark: "شەو", log_btn: "چوونەژوورەوە", log_u: "ناوی بەکارهێنەر", log_p: "کۆد", about_txt: "ئەم سیستمە لەلایەن <b>بژار ڕەشید</b> گەشەی پێدراوە بۆ بەڕێوەبردنی قیست و فرۆشتن بە شێوازێکی پێشکەوتوو.", th_date: "بەروار", th_amt: "بڕ" },
+        ar: { dir: "rtl", mhead: "القائمة", tform: "بيع جديد", lname: "اسم الزبون", litem: "الجهاز", lbuy: "سعر البيع", ldown: "المقدمة", lduration: "المدة", lmon: "القسط", ltotal: "المجموع", bsave: "حفظ", s1: "المخزن", s4: "الأرباح", th1: "الزبون", th2: "الجهاز", th3: "المجموع", th_down: "مقدمة", th4: "الأقساط", th5: "إجراء", madd: "المخزن", bclose: "إغلاق", search: "بحث...", inv_name: "المادة", inv_barcode: "بارکود", inv_qty: "الكمية", inv_add: "إضافة", marchive: "الأرشيف", mtrash: "المحذوفات", mbackup: "نسخ احتياطي", mreports: "التقارير", mabout: "حول المطور", mlogout: "تسجيل الخروج", mpc: "وضع الحاسوب", mdark: "الوضع الليلي", log_btn: "دخول", log_u: "اسم المستخدم", log_p: "كلمة المرور", about_txt: "تم تطوير هذا النظام بواسطة <b>بژار رشید</b> لإدارة المبيعات والأقساط بطريقة حديثة.", th_date: "التاريخ", th_amt: "المبلغ" },
+        en: { dir: "ltr", mhead: "MENU", tform: "NEW SALE", lname: "CUSTOMER NAME", litem: "ITEM", lbuy: "SELLING PRICE", ldown: "DOWNPAY", lduration: "PLAN", lmon: "MONTHLY", ltotal: "TOTAL", bsave: "SAVE", s1: "STOCK", s4: "PROFIT", th1: "NAME", th2: "ITEM", th3: "TOTAL", th_down: "DOWN", th4: "PAID", th5: "ACTION", madd: "INVENTORY", bclose: "CLOSE", search: "Search...", inv_name: "Item Name", inv_barcode: "Barcode", inv_qty: "Qty", inv_add: "Add", marchive: "Archive", mtrash: "Trash", mbackup: "Backup", mreports: "Reports", mabout: "About", mlogout: "Logout", mpc: "PC Mode", mdark: "Dark Mode", log_btn: "LOGIN", log_u: "USERNAME", log_p: "PASSWORD", about_txt: "Developed by <b>BIZHAR RASHEED</b> for modern management.", th_date: "Date", th_amt: "Amount" },
+        tr: { dir: "ltr", mhead: "MENÜ", tform: "YENİ SATIŞ", lname: "MÜŞTERİ ADI", litem: "ÜRÜN", lbuy: "SATIŞ FİYATI", ldown: "PEŞİNAT", lduration: "VADE", lmon: "TAKSİT", ltotal: "TOPLAM", bsave: "KAYDET", s1: "STOK", s4: "KÂR", th1: "AD", th2: "ÜRÜN", th3: "TOPLAM", th_down: "PEŞİN", th4: "ÖDENEN", th5: "İŞLEM", madd: "ENVANTER", bclose: "KAPAT", search: "Ara...", inv_name: "Ürün Adı", inv_barcode: "Barkod", inv_qty: "Adet", inv_add: "Ekle", marchive: "Arşiv", mtrash: "Çöp Kutusu", mbackup: "Yedekle", mreports: "Raporlar", mabout: "Hakkında", mlogout: "Çıkış Yap", mpc: "Masaüstü", mdark: "Gece Modu", log_btn: "GİRİŞ", log_u: "KULLANICI", log_p: "ŞİFRE", about_txt: "Bu sistem <b>BİZHAR RAŞİD</b> tarafından geliştirilmiştir.", th_date: "Tarih", th_amt: "Miktar" },
+        fa: { dir: "rtl", mhead: "منو", tform: "فروش جدید", lname: "نام مشتری", litem: "کالا", lbuy: "قیمت فروش", ldown: "پیش‌پرداخت", lduration: "مدت", lmon: "قسط", ltotal: "مجموع", bsave: "ذخیره", s1: "انبار", s4: "سود", th1: "نام", th2: "کالا", th3: "مجموع", th_down: "پیش‌پرداخت", th4: "اقساط", th5: "عملیات", madd: "موجودی", bclose: "بستن", search: "جستجو...", inv_name: "نام کالا", inv_barcode: "بارکد", inv_qty: "تعداد", inv_add: "افزودن", marchive: "آرشیو", mtrash: "زباله", mbackup: "پشتیبان", mreports: "گزارش‌ها", mabout: "درباره ما", mlogout: "خروج", mpc: "حالت دسکتاپ", mdark: "حالت شب", log_btn: "ورود", log_u: "نام کاربری", log_p: "رمز عبور", about_txt: "این سیستم توسط <b>بژار رشید</b> طراحی شده است.", th_date: "تاریخ", th_amt: "مiktar" }
     };
 
     window.onload = () => { if(localStorage.getItem("bizhar_logged") === "true") document.getElementById('login-overlay').style.display = 'none'; applyLang(); };
@@ -302,7 +316,7 @@
         document.getElementById('modal-title').innerText = l.mabout;
         document.getElementById('modal-content').innerHTML = `
             <div style="text-align:center; padding:20px;">
-                <img src="https://i.postimg.cc/3WMQdH2P/17ABF58A-85E9-4C1A-B6DD-97977E81AA3C.jpg" style="width: 100px; height: 100px; border-radius: 25px; margin-bottom: 20px; border: 2px solid var(--neon-purple);">
+                <img src="https://i.postimg.cc/nV1HLXWy/EFAC45A5-C196-48E5-913E-A27706778B90.jpg" style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1.5px solid var(--neon-blue);">
                 <p style="line-height:1.8;">${l.about_txt}</p>
                 <div style="margin-top:20px; font-weight:900;">
                     <a href="https://bizhar-cloud.github.io/BizharRasheed/" target="_blank" class="dev-link">BIZHAR RASHEED</a>
