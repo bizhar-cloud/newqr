@@ -43,7 +43,19 @@
             position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow);
         }
         .brand h2 { font-weight: 900; background: linear-gradient(135deg, #00d2ff, #bd00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .settings-btn { width: 45px; height: 45px; border-radius: 12px; background: var(--bg); color: var(--neon-blue); display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--neon-blue); cursor: pointer; }
+        
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .settings-btn, .notif-btn { width: 45px; height: 45px; border-radius: 12px; background: var(--bg); color: var(--neon-blue); display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--neon-blue); cursor: pointer; position: relative; }
+        
+        .notif-btn.active { color: var(--danger); border-color: var(--danger); animation: bell-ring 0.5s infinite; }
+        @keyframes bell-ring {
+            0%, 100% { transform: rotate(0); }
+            20% { transform: rotate(15deg); }
+            40% { transform: rotate(-15deg); }
+            60% { transform: rotate(10deg); }
+            80% { transform: rotate(-10deg); }
+        }
+        .notif-count { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 2px solid var(--card); }
 
         .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10000; }
         .menu-overlay.show { display: flex; }
@@ -55,7 +67,6 @@
         #lang-sel { 
             width: 100%; height: 55px; border: 2px solid var(--neon-blue); border-radius: 18px; margin-top: 15px; 
             font-weight: bold; background: var(--card); color: var(--text); padding: 0 15px; text-align: right; appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300d2ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat; background-position: left 15px center;
         }
         body[dir="ltr"] #lang-sel { text-align: left; background-position: right 15px center; }
@@ -89,17 +100,51 @@
         
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 
+        .report-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .rep-sum-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .rep-stat { background: var(--bg); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid var(--border); }
+
         #print-area { display: none; }
         @media print {
+            @page { margin: 0; }
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
-            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 80mm; padding: 4mm; background: white; color: black; font-size: 10pt; line-height: 1.4; }
-            .thermal-header { text-align: center; border-bottom: 1px dashed black; padding-bottom: 3mm; margin-bottom: 3mm; }
-            .thermal-row { display: flex; justify-content: space-between; margin-bottom: 1.5mm; }
-            .thermal-footer { text-align: center; border-top: 1px dashed black; padding-top: 3mm; margin-top: 3mm; font-size: 9pt; }
-            .receipt-title { font-weight: bold; border: 1px solid black; padding: 1mm; display: inline-block; margin-bottom: 2mm; }
+            #print-area { 
+                display: block !important; 
+                position: absolute; left: 0; top: 0; 
+                width: 76mm; padding: 4mm; 
+                background: white; color: black; 
+                font-family: 'Noto Sans Arabic', sans-serif;
+                font-size: 10pt; line-height: 1.4;
+            }
+            .thermal-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 3mm; margin-bottom: 3mm; }
+            .thermal-logo { width: 45mm; height: auto; margin-bottom: 2mm; filter: grayscale(1); }
+            .thermal-row { display: flex; justify-content: space-between; margin-bottom: 2mm; border-bottom: 0.1mm solid #eee; }
+            .thermal-row b { font-weight: 900; }
+            .thermal-footer { text-align: center; border-top: 1px dashed #000; padding-top: 3mm; margin-top: 4mm; font-size: 9pt; }
+            .receipt-title { font-weight: 900; border: 1px solid #000; padding: 1.5mm 3mm; display: inline-block; margin-bottom: 3mm; font-size: 11pt; border-radius: 2mm; }
             #qr-code-final { margin: 4mm auto; display: block; }
+            .thermal-item-box { background: #f9f9f9; padding: 2mm; border-radius: 1mm; margin: 2mm 0; }
         }
+
+        .dev-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: white !important;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 900;
+            transition: 0.3s;
+        }
+        .dev-link:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+
+        .notif-item { background: var(--bg); padding: 15px; border-radius: 15px; border: 1.5px solid var(--border); margin-bottom: 10px; position: relative; }
+        .notif-item b { color: var(--danger); display: block; }
+        .notif-item span { font-size: 13px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -115,9 +160,16 @@
 </div>
 
 <header>
-    <div style="width: 45px;"></div>
+    <div class="header-actions">
+        <button class="notif-btn" id="notif-bell" onclick="showNotifs()">
+            <i class="fa-solid fa-bell"></i>
+            <div id="notif-badge" class="notif-count" style="display:none">0</div>
+        </button>
+    </div>
     <div class="brand"><h2>Installments POS</h2></div>
-    <button class="settings-btn" onclick="toggleMenu()"><i class="fa-solid fa-bars-staggered"></i></button>
+    <div class="header-actions">
+        <button class="settings-btn" onclick="toggleMenu()"><i class="fa-solid fa-bars-staggered"></i></button>
+    </div>
 </header>
 
 <div class="menu-overlay" id="menu-overlay" onclick="toggleMenu()">
@@ -125,7 +177,7 @@
         <h4 id="m-header" style="text-align:center; color:var(--neon-blue); margin-bottom:20px; font-weight: 900;">MENU</h4>
         <button class="menu-item" onclick="toggleLayout()"><i class="fa-solid fa-display"></i> <span id="m-pc">PC Mode</span></button>
         <button class="menu-item" onclick="toggleDark()"><i id="mode-icon" class="fa-solid fa-moon"></i> <span id="m-dark">Dark Mode</span></button>
-        <button class="menu-item" onclick="showReports()"><i class="fa-solid fa-chart-line"></i> <span id="m-reports">Reports</span></button>
+        <button class="menu-item" onclick="showReports('daily')"><i class="fa-solid fa-chart-line"></i> <span id="m-reports">Reports</span></button>
         <button class="menu-item" onclick="showArchive()"><i class="fa-solid fa-folder-open"></i> <span id="m-archive">Archive</span></button>
         <button class="menu-item" onclick="showRecycleBin()"><i class="fa-solid fa-trash-can"></i> <span id="m-trash">Recycle Bin</span></button>
         <button class="menu-item" onclick="checkInvPass()"><i class="fa-solid fa-boxes-stacked"></i> <span id="m-add">Inventory</span></button>
@@ -270,12 +322,12 @@
     let activeScanner = null;
 
     const translations = {
-        bd: { mhead: "مینیو", tform: "فرۆشتنا نوی", lname: "ناڤێ کڕیاری", lphone: "موبایلا کڕیاری", lwitness: "ناڤێ دیدەڤانی", lwphone: "موبایلا دیدەڤانی", litem: " ئامێر/کاڵا", lbuy: "بهایێ فرۆتنێ", ldown: "پێشەکی", lduration: "ماوێ قیستێ", lmon: "قیست", ltotal: "کۆم", bsave: "تۆمارکرن", s1: "کۆگە", s4: "قازانج", srem: "ماوە", sannual: "تەخمینا ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: " ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "مەخزەن", bclose: "داخستن", search: "لێگەریان...", inv_name: "ناڤێ ئامێری (Barcode)", inv_qty: "دانە", inv_add: "زێدەکرن", marchive: "ئەڕشیف", mtrash: "گلێش", mbackup: "سەیفکرنا ئێکسل", mrestore: "دووبارە زێدەکرن", mreports: "ڕاپۆرت", mabout: "گەشەپێدەر", mlogout: "چوونەدەر", mpc: "کۆمپیوتەر", mdark: "شەڤ", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەڤ سیستەمە ژ لایێ گەشەپێدەر بژار ڕەشید هاتیە دروستکرن", other: "پشکێن دی", lsaletype: "جۆرێ فرۆشتنێ", custom_rate: "ڕێژەیا قازانجی %", custom_months: "هژمارا هەیڤان" },
-        sr: { mhead: "مینیو", tform: "فرۆشتنی نوێ", lname: "ناوی کڕیار", lphone: "موبایلی کڕیار", lwitness: "ناوی دیدەڤان", lwphone: "موبایلی دیدەڤان", litem: "ئامێر", lbuy: "نرخی فرۆشتن", ldown: "پێشەکی", lduration: "ماوە", lmon: "قیست", ltotal: "کۆم", bsave: "پاشەکەوت", s1: "کۆگا", s4: "قازانج", srem: "ماوە", sannual: "تەخمینی ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "کۆگا", bclose: "داخستن", search: "گەڕان...", inv_name: "ناوی کاڵا", inv_qty: "ژمارە", inv_add: "زیادکردن", marchive: "ئەرشیف", mtrash: "تەنەکەی خۆڵ", mbackup: "باکئەپی ئێکسل", mrestore: "گێڕانەوەی داتا", mreports: "ڕاپۆرتەکان", mabout: "دەربارەی سیستم", mlogout: "چوونەدەرەوە", mpc: "کۆمپیوتەر", mdark: "شەو", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەم سیستمە لەلایەن گەشەپێدەر بژار ڕەشید دروست کراوە", other: "بەشەکانی تر", lsaletype: "جۆری فرۆشتن", custom_rate: "ڕێژەی قازانج %", custom_months: "ژمارەی مانگەکان" },
-        ar: { mhead: "القائمة", tform: "بيع جديد", lname: "اسم الزبون", lphone: "موبايل الزبون", lwitness: "اسم الشاهد", lwphone: "موبايل الشاهد", litem: "الجهاز", lbuy: "سعر البيع", ldown: "المقدمة", lduration: "المدة", lmon: "القسط", ltotal: "المجموع", bsave: "حفظ", s1: "المخزن", s4: "الأرباح", srem: "المتبقي", sannual: "التوقعات السنوية", lnote: "ملاحظات", th1: "الزبون", th2: "الجهاز", th3: "المجموع", th_down: "مقدمة", th4: "الأقساط", th5: "إجراء", madd: "المخزن", bclose: "إغلاق", search: "بحث...", inv_name: "المادة", inv_qty: "الكمية", inv_add: "إضافة", marchive: "الأرشيف", mtrash: "المحذوفات", mbackup: "نسخ إكسل", mrestore: "استعادة", mreports: "التقارير", mabout: "حول المطور", mlogout: "خروج", mpc: "کمبيوتر", mdark: "ليلي", mlight: "نهاري", dev_role: "IT Specialist & Developer", dev_msg: "تم تطوير هذا النظام من قبل المطور بژار رشيد", other: "أقسام أخرى", lsaletype: "نوع البيع", custom_rate: "نسبة الربح %", custom_months: "عدد الأشهر" },
-        en: { mhead: "MENU", tform: "NEW SALE", lname: "CUSTOMER NAME", lphone: "PHONE", lwitness: "WITNESS", lwphone: "WIT PHONE", litem: "ITEM", lbuy: "PRICE", ldown: "DOWN", lduration: "PLAN", lmon: "MONTHLY", ltotal: "TOTAL", bsave: "SAVE", s1: "STOCK", s4: "PROFIT", srem: "REMAIN", sannual: "ANNUAL FORECAST", lnote: "NOTES", th1: "NAME", th2: "ITEM", th3: "TOTAL", th_down: "DOWN", th4: "PAID", th5: "ACTION", madd: "INVENTORY", bclose: "CLOSE", search: "Search...", inv_name: "Item Name", inv_qty: "Qty", inv_add: "Add", marchive: "Archive", mtrash: "Trash", mbackup: "Backup", mrestore: "Restore", mreports: "Reports", mabout: "About", mlogout: "Logout", mpc: "PC Mode", mdark: "Dark Mode", mlight: "Light Mode", dev_role: "IT Specialist & Developer", dev_msg: "Developed by Bizhar Rasheed", other: "Other Items", lsaletype: "Sale Type", custom_rate: "Custom Rate %", custom_months: "Custom Months" },
-        tr: { mhead: "MENÜ", tform: "YENİ SATIŞ", lname: "MÜŞTERİ ADI", lphone: "TELEFON", lwitness: "ŞAHİT", lwphone: "ŞAHİT TEL", litem: "ÜRÜN", lbuy: "SATIŞ FİYATI", ldown: "PEŞİNAT", lduration: "VADE", lmon: "TAKSİT", ltotal: "TOPLAM", bsave: "KAYDET", s1: "STOK", s4: "KÂR", srem: "KALAN", sannual: "YILLIK TAHMİN", lnote: "NOTLAR", th1: "MÜŞTERİ", th2: "ÜRÜN", th3: "TOPLAM", th_down: "PEŞİN", th4: "ÖDENEN", th5: "İŞLEM", madd: "ENVANTER", bclose: "KAPAT", search: "Ara...", inv_name: "Ürün Adı", inv_qty: "Adet", inv_add: "Ekle", marchive: "Arşiv", mtrash: "Çöp Kutusu", mbackup: "Excel Yedek", mrestore: "Veri Yükle", mreports: "Raporlar", mabout: "Geliştirici", mlogout: "Çıkış Yap", mpc: "PC Modu", mdark: "Karanlık", mlight: "Aydınlık", dev_role: "IT Uzmanı ve Sistem Geliştiricisi", dev_msg: "Bu sistem Geliştirici Bizhar Rasheed tarafından tasarlanmıştır", other: "Diğer Bölümler", lsaletype: "Satış Türü", custom_rate: "Özel Kar %", custom_months: "Taksit Sayısı" },
-        fa: { mhead: "منو", tform: "فروش جدید", lname: "نام مشتری", lphone: "تلفن مشتری", lwitness: "نام شاهد", lwphone: "تلفن شاهد", litem: "کالا", lbuy: "قیمت فروش", ldown: "پیش‌پرداخت", lduration: "مدت اقساط", lmon: "قسط ماهانه", ltotal: "مجموع", bsave: "ذخیره", s1: "انبار", s4: "سود", srem: "مانده", sannual: "پیش‌بینی سالانه", lnote: "یادداشت", th1: "مشتری", th2: "کالا", th3: "مجموع", th_down: "پیش‌پرداخت", th4: "پرداختی", th5: "عملیات", madd: "موجودی", bclose: "بستن", search: "جستجو...", inv_name: "نام کالا", inv_qty: "تعداد", inv_add: "افزودن", marchive: "آرشیو", mtrash: "سطل زباله", mbackup: "خروجی اکسل", mrestore: "بازیابی داده", mreports: "گزارش‌ها", mabout: "توسعه‌دهنده", mlogout: "خروج", mpc: "حالت کامپیوتر", mdark: "حالت شب", mlight: "حالت روز", dev_role: "متخصص IT و توسعه‌دهنده سیستم", dev_msg: "این سیستم توسط توسعه‌دهنده بژار رشید طراحی شده است", other: "بخش‌های دیگر", lsaletype: "نوع فروش", custom_rate: "نرخ سود %", custom_months: "تعداد ماه" }
+        bd: { mhead: "مینیو", tform: "فرۆشتنا نوی", lname: "ناڤێ کڕیاری", lphone: "موبایلا کڕیاری", lwitness: "ناڤێ دیدەڤانی", lwphone: "موبایلا دیدەڤانی", litem: " ئامێر/کاڵا", lbuy: "بهایێ فرۆتنێ", ldown: "پێشەکی", lduration: "ماوێ قیستێ", lmon: "قیست", ltotal: "کۆم", bsave: "تۆمارکرن", s1: "کۆگە", s4: "قازانج", srem: "ماوە", sannual: "تەخمینا ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: " ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "مەخزەن", bclose: "داخستن", search: "لێگەریان...", inv_name: "ناڤێ ئامێری (Barcode)", inv_qty: "دانە", inv_add: "زێدەکرن", marchive: "ئەڕشیف", mtrash: "گلێش", mbackup: "سەیفکرنا ئێکسل", mrestore: "دووبارە زێدەکرن", mreports: "ڕاپۆرت", mabout: "گەشەپێدەر", mlogout: "چوونەدەر", mpc: "کۆمپیوتەر", mdark: "شەڤ", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەڤ سیستەمە ژ لایێ بژار ڕەشید هاتیە دروستکرن", other: "پشکێن دی", lsaletype: "جۆرێ فرۆشتنێ", custom_rate: "ڕێژەیا قازانجی %", custom_months: "هژمارا هەیڤان", rep_d: "ڕۆژانە", rep_m: "هەیڤانە", rep_y: "ساڵانە", rep_count: "هژمارا وەصلا", rep_total: "کۆما پارەی", click_visit: "بۆ دیتنا پۆرتبۆلیۆی کلیک بکە", rec_title: "وەصلا وەرگرتنێ", rec_cust: "کڕیار", rec_wit: "دیدەڤان", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەیا هەوە", notif_title: "ئاگەهداریێن قستان", notif_msg: "٣ ڕۆژ ماینە بۆ دانا قستێ" },
+        sr: { mhead: "مینیو", tform: "فرۆشتنی نوێ", lname: "ناوی کڕیار", lphone: "موبایلی کڕیار", lwitness: "ناوی دیدەڤان", lwphone: "موبایلی دیدەڤان", litem: "ئامێر", lbuy: "نرخی فرۆشتن", ldown: "پێشەکی", lduration: "ماوە", lmon: "قیست", ltotal: "کۆم", bsave: "پاشەکەوت", s1: "کۆگا", s4: "قازانج", srem: "ماوە", sannual: "تەخمینی ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "کۆگا", bclose: "داخستن", search: "گەڕان...", inv_name: "ناوی کاڵا", inv_qty: "ژمارە", inv_add: "زیادکردن", marchive: "ئەرشیف", mtrash: "تەنەکەی خۆڵ", mbackup: "باکئەپی ئێکسل", mrestore: "گێڕانەوەی داتا", mreports: "ڕاپۆرتەکان", mabout: "دەربارەی سیستم", mlogout: "چوونەدەرەوە", mpc: "کۆمپیوتەر", mdark: "شەو", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەم سیستمە لەلایەن بژار ڕەشید دروست کراوە", other: "بەشەکانی تر", lsaletype: "جۆری فرۆشتن", custom_rate: "ڕێژەی قازانج %", custom_months: "ژمارەی مانگەکان", rep_d: "ڕۆژانە", rep_m: "مانگانە", rep_y: "ساڵانە", rep_count: "ژمارەی وەصڵ", rep_total: "کۆی پارە", click_visit: "بۆ بینینی پۆرتبۆلیۆ کلیک بکە", rec_title: "وەصڵی وەرگرتن", rec_cust: "کڕیار", rec_wit: "شایەت", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەکەتان", notif_title: "ئاگادارکەرەوەی قیستەکان", notif_msg: "٣ ڕۆژ ماوە بۆدانی قیست" },
+        ar: { mhead: "القائمة", tform: "بيع جديد", lname: "اسم الزبون", lphone: "موبايل الزبون", lwitness: "اسم الشاهد", lwphone: "موبايل الشاهد", litem: "الجهاز", lbuy: "سعر البيع", ldown: "المقدمة", lduration: "المدة", lmon: "القسط", ltotal: "المجموع", bsave: "حفظ", s1: "المخزن", s4: "الأرباح", srem: "المتبقي", sannual: "التوقعات السنوية", lnote: "ملاحظات", th1: "الزبون", th2: "الجهاز", th3: "المجموع", th_down: "مقدمة", th4: "الأقساط", th5: "إجراء", madd: "المخزن", bclose: "إغلاق", search: "بحث...", inv_name: "المادة", inv_qty: "الكمية", inv_add: "إضافة", marchive: "الأرشيف", mtrash: "المحذوفات", mbackup: "نسخ إكسل", mrestore: "استعادة", mreports: "التقارير", mabout: "حول المطور", mlogout: "خروج", mpc: "کمبيوتر", mdark: "ليلي", mlight: "نهاري", dev_role: "IT Specialist & Developer", dev_msg: "تم تطوير هذا النظام من قبل بژار رشيد", other: "أقسام أخرى", lsaletype: "نوع البيع", custom_rate: "نسبة الربح %", custom_months: "عدد الأشهر", rep_d: "يومي", rep_m: "شهري", rep_y: "سنوي", rep_count: "عدد الفواتير", rep_total: "إجمالي المبلغ", click_visit: "انقر لزيارة معرض الأعمال", rec_title: "وصل استلام", rec_cust: "الزبون", rec_wit: "الشاهد", rec_rem: "المتبقي", rec_msg: "شكراً لثقتكم بنا", notif_title: "تنبيهات الأقساط", notif_msg: "بقي 3 أيام لموعد القسط" },
+        en: { mhead: "MENU", tform: "NEW SALE", lname: "CUSTOMER NAME", lphone: "PHONE", lwitness: "WITNESS", lwphone: "WIT PHONE", litem: "ITEM", lbuy: "PRICE", ldown: "DOWN", lduration: "PLAN", lmon: "MONTHLY", ltotal: "TOTAL", bsave: "SAVE", s1: "STOCK", s4: "PROFIT", srem: "REMAIN", sannual: "ANNUAL FORECAST", lnote: "NOTES", th1: "NAME", th2: "ITEM", th3: "TOTAL", th_down: "DOWN", th4: "PAID", th5: "ACTION", madd: "INVENTORY", bclose: "CLOSE", search: "Search...", inv_name: "Item Name", inv_qty: "Qty", inv_add: "Add", marchive: "Archive", mtrash: "Trash", mbackup: "Backup", mrestore: "Restore", mreports: "Reports", mabout: "About", mlogout: "Logout", mpc: "PC Mode", mdark: "Dark Mode", mlight: "Light Mode", dev_role: "IT Specialist & Developer", dev_msg: "Developed by Bizhar Rasheed", other: "Other Items", lsaletype: "Sale Type", custom_rate: "Custom Rate %", custom_months: "Custom Months", rep_d: "Daily", rep_m: "Monthly", rep_y: "Yearly", rep_count: "Receipts", rep_total: "Total Amount", click_visit: "Click to visit Portfolio", rec_title: "RECEIPT", rec_cust: "Customer", rec_wit: "Witness", rec_rem: "Remain", rec_msg: "Thank you for your trust", notif_title: "Installment Alerts", notif_msg: "3 days left for payment" },
+        tr: { mhead: "MENÜ", tform: "YENİ SATIŞ", lname: "MÜŞTERİ ADI", lphone: "TELEFON", lwitness: "ŞAHİT", lwphone: "ŞAHİT TEL", litem: "ÜRÜN", lbuy: "SATIŞ FİYATI", ldown: "PEŞİNAT", lduration: "VADE", lmon: "TAKSİT", ltotal: "TOPLAM", bsave: "KAYDET", s1: "STOK", s4: "KÂR", srem: "KALAN", sannual: "YILLIK TAHMİN", lnote: "NOTLAR", th1: "MÜŞTERİ", th2: "ÜRÜN", th3: "TOPLAM", th_down: "PEŞİN", th4: "ÖDENEN", th5: "İŞLEM", madd: "ENVANTER", bclose: "KAPAT", search: "Ara...", inv_name: "Ürün Adı", inv_qty: "Adet", inv_add: "Ekle", marchive: "Arşiv", mtrash: "Çöp Kutusu", mbackup: "Excel Yedek", mrestore: "Veri Yükle", mreports: "Raporlar", mabout: "Geliştirici", mlogout: "Çıkış Yap", mpc: "PC Modu", mdark: "Karanlık", mlight: "Aydınlık", dev_role: "IT Uzmanı ve Sistem Geliştiricisi", dev_msg: "Bu sistem Bizhar Rasheed tarafından tasarlanmıştır", other: "Diğer Bölümler", lsaletype: "Satış Türü", custom_rate: "Özel Kar %", custom_months: "Taksit Sayısı", rep_d: "Günlük", rep_m: "Aylık", rep_y: "Yıllık", rep_count: "Fiş Sayısı", rep_total: "Toplam Tutar", click_visit: "Portfolyoyu ziyaret et", rec_title: "FİŞ / MAKBUZ", rec_cust: "Müşteri", rec_wit: "Şahit", rec_rem: "Kalan", rec_msg: "Bize güvendiğiniz için teşekkürler", notif_title: "Taksit Uyarıları", notif_msg: "Ödeme için son 3 gün" },
+        fa: { mhead: "منو", tform: "فروش جدید", lname: "نام مشتری", lphone: "تلفن مشتری", lwitness: "نام شاهد", lwphone: "تلفن شاهد", litem: "کالا", lbuy: "قیمت فروش", ldown: "پیش‌پرداخت", lduration: "مدت اقساط", lmon: "قسط ماهانه", ltotal: "مجموع", bsave: "ذخیره", s1: "انبار", s4: "سود", srem: "مانده", sannual: "پیش‌بینی سالانه", lnote: "یادداشت", th1: "مشتری", th2: "کالا", th3: "مجموع", th_down: "پیش‌پرداخت", th4: "پرداختی", th5: "عملیات", madd: "موجودی", bclose: "بستن", search: "جستجو...", inv_name: "نام کالا", inv_qty: "تعداد", inv_add: "افزودن", marchive: "آرشیو", mtrash: "سطل زباله", mbackup: "خروجی اکسل", mrestore: "بازیابی داده", mreports: "گزارش‌ها", mabout: "توسعه‌دهنده", mlogout: "خروج", mpc: "حالت کامپیوتر", mdark: "حالت شب", mlight: "حالت روز", dev_role: "متخصص IT و توسعه‌دهنده سیستم", dev_msg: "این سیستم توسط بژار رشید طراحی شده است", other: "بخش‌های دیگر", lsaletype: "نوع فروش", custom_rate: "نرخ سود %", custom_months: "تعداد ماه", rep_d: "روزانه", rep_m: "ماهانه", rep_y: "سالانه", rep_count: "تعداد قبض", rep_total: "جمع کل", click_visit: "برای مشاهده رزومه کلیک کنید", rec_title: "رسید پرداخت", rec_cust: "مشتری", rec_wit: "شاهد", rec_rem: "باقیمانده", rec_msg: "از اعتماد شما متشکریم", notif_title: "هشدار اقساط", notif_msg: "3 روز مانده به موعد قسط" }
     };
 
     window.onload = () => { if(localStorage.getItem("bizhar_logged") === "true") document.getElementById('login-overlay').style.display = 'none'; applyLang(); toggleSaleMode(); };
@@ -283,7 +335,7 @@
     function logout() { localStorage.removeItem("bizhar_logged"); location.reload(); }
     function checkInvPass() { if(prompt("MASTER KEY:") === SECRET_KEY) showInventory(); }
 
-    db.ref('/').on('value', snap => { const d = snap.val(); if(d){ inv=d.i||[]; sales=d.s||[]; archive=d.a||[]; trash=d.t||[]; reports=d.r||[]; render(); } });
+    db.ref('/').on('value', snap => { const d = snap.val(); if(d){ inv=d.i||[]; sales=d.s||[]; archive=d.a||[]; trash=d.t||[]; reports=d.r||[]; render(); checkInstallmentsNotif(); } });
     function updateDB() { db.ref('/').set({ i: inv, s: sales, a: archive, t: trash, r: reports }); }
 
     function togglePrivacy() { privacyHidden = !privacyHidden; render(); }
@@ -348,7 +400,6 @@
             total = b + (b * rate);
             mon = (total - d) / m;
         } else {
-            // Cash Mode
             total = b;
             mon = 0;
             m = 1; 
@@ -391,6 +442,7 @@
             months:p.m, 
             paid:(saleType === 'Cash' ? p.m : 0), 
             date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            lastPaymentDate: Date.now(), // Track for notifications
             note: nt,
             type: saleType
         };
@@ -418,6 +470,7 @@
         if(idx !== -1) {
             sales[idx].paid++;
             const now = new Date();
+            sales[idx].lastPaymentDate = now.getTime(); // Update date
             const payTime = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
             const remCount = (sales[idx].months - sales[idx].paid);
@@ -426,7 +479,8 @@
                 payDate: payTime, 
                 currentPayment: sales[idx].paid, 
                 remAmt: (remCount * parseFloat(sales[idx].mon)).toFixed(2),
-                remCount: remCount
+                remCount: remCount,
+                timestamp: Date.now()
             };
             
             reports.unshift(rep);
@@ -436,54 +490,112 @@
         }
     }
 
+    // --- Notification Logic ---
+    function checkInstallmentsNotif() {
+        const now = Date.now();
+        const dueDays = 27;
+        const dueMillis = dueDays * 24 * 60 * 60 * 1000;
+        let count = 0;
+
+        sales.forEach(s => {
+            if(s.type === 'Installments' && (now - s.lastPaymentDate) >= dueMillis) {
+                count++;
+            }
+        });
+
+        const bell = document.getElementById('notif-bell');
+        const badge = document.getElementById('notif-badge');
+        if(count > 0) {
+            bell.classList.add('active');
+            badge.style.display = 'flex';
+            badge.innerText = count;
+        } else {
+            bell.classList.remove('active');
+            badge.style.display = 'none';
+        }
+    }
+
+    function showNotifs() {
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd;
+        const now = Date.now();
+        const dueMillis = 27 * 24 * 60 * 60 * 1000;
+        
+        let html = '';
+        sales.forEach(s => {
+            if(s.type === 'Installments' && (now - s.lastPaymentDate) >= dueMillis) {
+                html += `
+                <div class="notif-item">
+                    <b>${s.name}</b>
+                    <span>${s.item} - ${l.notif_msg}</span>
+                    <p style="font-size:10px; margin-top:5px;">Last pay: ${new Date(s.lastPaymentDate).toLocaleDateString()}</p>
+                </div>`;
+            }
+        });
+
+        document.getElementById('modal-title').innerText = l.notif_title;
+        document.getElementById('modal-content').innerHTML = html || `<p style="text-align:center; padding:20px;">No Alerts.</p>`;
+        document.getElementById('modal-universal').style.display = 'flex';
+    }
+
     function printThermal(data) {
         const area = document.getElementById('print-area');
+        const lang = document.getElementById('lang-sel').value;
+        const l = translations[lang] || translations.bd;
+        const isRtl = !['en','tr'].includes(lang);
+        
         let detailsHtml = "";
         const d = data.itemDetails;
         
         if(d.type === "Mobile") {
-            detailsHtml = `Model: ${d.model} | ${d.storage}/${d.ram}GB | ${d.color} | ${d.condition}`;
+            detailsHtml = `${d.model} | ${d.storage}/${d.ram}GB | ${d.color} | ${d.condition}`;
         } else if(d.type === "Computer") {
-            detailsHtml = `CPU: ${d.cpu} ${d.gen} | RAM: ${d.ram}GB | SSD: ${d.storage} | GPU: ${d.gpu} ${d.vram}`;
+            detailsHtml = `${d.cpu} ${d.gen} | RAM: ${d.ram}GB | SSD: ${d.storage} | GPU: ${d.gpu}`;
         } else if(d.type === "Other") {
-            detailsHtml = `Info: ${d.otherInfo || '---'}`;
+            detailsHtml = `${d.otherInfo || '---'}`;
         }
 
-        const qrContent = `POS-ELITE: ${data.name} | Item: ${data.item} | Paid: ${data.currentPayment}/${data.months} | Remaining: $${data.remAmt}`;
+        const qrContent = `POS: ${data.name} | Item: ${data.item} | Paid: ${data.currentPayment}/${data.months} | Rem: $${data.remAmt}`;
 
         area.innerHTML = `
-            <div class="thermal-header">
-                <div class="receipt-title">RECEIPT / وەسلا وەرگرتنێ</div>
-                <h2 style="margin:2mm 0;">Installments POS</h2>
-                <p>${data.payDate}</p>
-            </div>
-            <div class="thermal-row"><span>Customer:</span><b>${data.name}</b></div>
-            <div class="thermal-row"><span>Phone:</span><b>${data.phone || '---'}</b></div>
-            <div class="thermal-row"><span>Witness:</span><b>${data.witness || '---'}</b></div>
-            <div class="thermal-row"><span>Device:</span><b>${data.item}</b></div>
-            <div style="font-size:8pt; margin-bottom:2mm; border-bottom:0.1mm solid #000; padding-bottom:1mm;">${detailsHtml}</div>
-            
-            <div class="thermal-row"><span>Total:</span><b>$${data.total}</b></div>
-            <div class="thermal-row"><span>Monthly:</span><b>$${data.mon}</b></div>
-            <hr style="border:0.2mm dashed black; margin:2mm 0;">
-            <div class="thermal-row" style="font-size:11pt;"><span>Receipt No:</span><b>#${data.currentPayment}</b></div>
-            <div class="thermal-row"><span>Remaining:</span><b>$${data.remAmt}</b></div>
-            
-            <div id="qr-code-final" style="display: flex; justify-content: center;"></div>
+            <div style="direction: ${isRtl ? 'rtl' : 'ltr'};">
+                <div class="thermal-header">
+                    <img src="https://i.postimg.cc/3WMQdH2P/17ABF58A-85E9-4C1A-B6DD-97977E81AA3C.jpg" class="thermal-logo">
+                    <div class="receipt-title">${l.rec_title}</div>
+                    <p style="font-size: 9pt;">${data.payDate}</p>
+                </div>
+                
+                <div class="thermal-row"><span>${l.rec_cust}:</span><b>${data.name}</b></div>
+                <div class="thermal-row"><span>${l.lphone}:</span><b>${data.phone || '---'}</b></div>
+                <div class="thermal-row"><span>${l.rec_wit}:</span><b>${data.witness || '---'}</b></div>
+                
+                <div class="thermal-item-box">
+                    <div style="font-weight: 900; margin-bottom: 1mm;">${data.item}</div>
+                    <div style="font-size: 8.5pt; color: #333;">${detailsHtml}</div>
+                </div>
+                
+                <div class="thermal-row"><span>${l.ltotal}:</span><b>$${data.total}</b></div>
+                <div class="thermal-row"><span>${l.lmon}:</span><b>$${data.mon}</b></div>
+                <div class="thermal-row" style="margin-top: 2mm; border-top: 1px solid #000; padding-top: 1mm;"><span>${l.th4}:</span><b>${data.currentPayment} / ${data.months}</b></div>
+                <div class="thermal-row" style="font-size: 11pt; color: #000;"><span>${l.rec_rem}:</span><b>$${data.remAmt}</b></div>
+                
+                <div id="qr-code-final"></div>
 
-            <div class="thermal-footer">
-                <p>تێبینی: ${data.note || '---'}</p>
-                <p style="margin-top:2mm; font-weight:bold;">بژار ڕەشید - 07503644666</p>
-                <p>BIT.KURDITPC</p>
+                <div class="thermal-footer">
+                    <p style="margin-bottom: 1mm;">${l.lnote}: ${data.note || '---'}</p>
+                    <p style="font-weight: 900; font-size: 10pt;">${l.rec_msg}</p>
+                    <p style="margin-top: 2mm; border-top: 1px dashed #ccc; padding-top: 1mm;">Powered BY: BIZHAR RASHEED</p>
+                    <p>0750 364 4666</p>
+                </div>
             </div>`;
 
         new QRCode(document.getElementById("qr-code-final"), {
             text: qrContent,
-            width: 100,
-            height: 100
+            width: 120,
+            height: 120,
+            correctLevel : QRCode.CorrectLevel.H
         });
 
-        setTimeout(() => { window.print(); }, 500);
+        setTimeout(() => { window.print(); }, 600);
     }
 
     function showInventory() {
@@ -675,12 +787,47 @@
         });
     }
 
-    function showReports() {
-        document.getElementById('modal-title').innerText = "Reports (دوماهیک پارێدان)";
+    function showReports(type = 'daily') {
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd;
+        document.getElementById('modal-title').innerText = l.mreports;
+        if(document.getElementById('menu-overlay').classList.contains('show')) toggleMenu();
+
+        let filtered = [];
+        const today = new Date();
+        
+        if(type === 'daily') {
+            const dateStr = today.toLocaleDateString();
+            filtered = reports.filter(r => new Date(r.timestamp).toLocaleDateString() === dateStr);
+        } else if(type === 'monthly') {
+            const month = today.getMonth(), year = today.getFullYear();
+            filtered = reports.filter(r => {
+                const d = new Date(r.timestamp);
+                return d.getMonth() === month && d.getFullYear() === year;
+            });
+        } else if(type === 'yearly') {
+            const year = today.getFullYear();
+            filtered = reports.filter(r => new Date(r.timestamp).getFullYear() === year);
+        }
+
+        const totalAmt = filtered.reduce((acc, curr) => acc + parseFloat(curr.mon), 0);
+
         document.getElementById('modal-content').innerHTML = `
-        <div class="table-wrap"><table><thead><tr><th>Name</th><th>Date</th><th>Amount</th></tr></thead>
-        <tbody>${reports.map(x=>`<tr><td>${x.name}</td><td>${x.payDate}</td><td>$${x.mon}</td></tr>`).join('')}</tbody></table></div>`;
-        document.getElementById('modal-universal').style.display = 'flex'; toggleMenu();
+        <div class="report-tabs">
+            <button class="tab-btn ${type === 'daily' ? 'active' : ''}" onclick="showReports('daily')">${l.rep_d}</button>
+            <button class="tab-btn ${type === 'monthly' ? 'active' : ''}" onclick="showReports('monthly')">${l.rep_m}</button>
+            <button class="tab-btn ${type === 'yearly' ? 'active' : ''}" onclick="showReports('yearly')">${l.rep_y}</button>
+        </div>
+        <div class="rep-sum-box">
+            <div class="rep-stat"><small>${l.rep_count}</small><h3>${filtered.length}</h3></div>
+            <div class="rep-stat"><small>${l.rep_total}</small><h3 style="color:var(--success)">$${totalAmt.toFixed(2)}</h3></div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>${l.th1}</th><th>Date</th><th>Amount</th></tr></thead>
+                <tbody>${filtered.map(x=>`<tr><td>${x.name}</td><td>${x.payDate}</td><td>$${x.mon}</td></tr>`).join('')}</tbody>
+            </table>
+        </div>`;
+        document.getElementById('modal-universal').style.display = 'flex';
     }
 
     function toggleLayout() { document.getElementById('app-container').classList.toggle('pc-mode-active'); toggleMenu(); }
@@ -697,7 +844,16 @@
     function showAbout() {
         const l = translations[document.getElementById('lang-sel').value] || translations.bd;
         document.getElementById('modal-title').innerText = l.mabout;
-        document.getElementById('modal-content').innerHTML = `<div style="text-align:center; padding:20px;"><img src="https://i.postimg.cc/nV1HLXWy/EFAC45A5-C196-48E5-913E-A27706778B90.jpg" style="width:120px; border-radius:50%; border:3px solid var(--neon-blue); margin-bottom:15px;"><h2 style="color:var(--neon-blue)">Bizhar Rasheed</h2><p>${l.dev_role}</p><p>${l.dev_msg}</p></div>`;
+        document.getElementById('modal-content').innerHTML = `
+        <div style="text-align:center; padding:20px;">
+            <img src="https://i.postimg.cc/nV1HLXWy/EFAC45A5-C196-48E5-913E-A27706778B90.jpg" style="width:120px; border-radius:50%; border:3px solid var(--neon-blue); margin-bottom:15px;">
+            <h2 style="color:var(--neon-blue)">Bizhar Rasheed</h2>
+            <p style="font-weight:700; margin-bottom:5px;">${l.dev_role}</p>
+            <p>${l.dev_msg}</p>
+            <a href="https://bizhar-cloud.github.io/BizharRasheed/" target="_blank" class="dev-link">
+                <i class="fa-solid fa-globe"></i> ${l.click_visit}
+            </a>
+        </div>`;
         document.getElementById('modal-universal').style.display = 'flex'; toggleMenu();
     }
 </script>
