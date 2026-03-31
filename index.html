@@ -179,10 +179,10 @@
 <div id="login-overlay">
     <div class="login-box">
         <img src="https://i.postimg.cc/nV1HLXWy/EFAC45A5-C196-48E5-913E-A27706778B90.jpg" style="width: 100%; border-radius: 20px; margin-bottom: 20px;">
-        <h2 style="color:var(--neon-blue); margin-bottom:20px; font-weight: 900;">Installments POS</h2>
+        <h2 id="login-title" style="color:var(--neon-blue); margin-bottom:20px; font-weight: 900;">Installments POS</h2>
         <input type="text" id="login-user" placeholder="USERNAME">
         <input type="password" id="login-pass" placeholder="PASSWORD">
-        <button class="main-btn" onclick="checkLogin()">LOGIN</button>
+        <button class="main-btn" id="login-btn" onclick="checkLogin()">LOGIN</button>
     </div>
 </div>
 
@@ -210,8 +210,8 @@
         <button class="menu-item" onclick="checkInvPass()"><i class="fa-solid fa-boxes-stacked"></i> <span id="m-add">Inventory</span></button>
         <hr style="border: 0.5px solid var(--border); margin: 15px 0;">
         <button class="menu-item" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> <span id="m-backup">Export Excel</span></button>
-        <button class="menu-item" onclick="exportJSON()"><i class="fa-solid fa-file-code"></i> <span>Backup (JSON)</span></button>
-        <button class="menu-item" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> <span>Export PDF</span></button>
+        <button class="menu-item" onclick="exportJSON()"><i class="fa-solid fa-file-code"></i> <span id="m-backup-json">Backup (JSON)</span></button>
+        <button class="menu-item" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> <span id="m-pdf">Export PDF</span></button>
         <button class="menu-item" onclick="triggerRestore()"><i class="fa-solid fa-cloud-arrow-up"></i> <span id="m-restore">Restore Data</span></button>
         <input type="file" id="restore-input" style="display:none" accept=".json" onchange="restoreData(event)">
         <button class="menu-item" onclick="showAbout()"><i class="fa-solid fa-user-gear"></i> <span id="m-about">Developer</span></button>
@@ -237,8 +237,8 @@
             
             <label id="l-sale-type" style="font-weight: 700; margin-top: 15px; display: block;">SALE TYPE</label>
             <select id="i-sale-type" onchange="toggleSaleMode()">
-                <option value="Installments">Installments (بقیست)</option>
-                <option value="Cash">Cash (کاش)</option>
+                <option value="Installments" id="opt-inst">Installments (بقیست)</option>
+                <option value="Cash" id="opt-cash">Cash (کاش)</option>
             </select>
 
             <label id="l-name" style="font-weight: 700; margin-top: 15px; display: block;">CUSTOMER NAME</label>
@@ -281,7 +281,7 @@
                     <option value="10">10 Months (60%)</option>
                     <option value="12">12 Months (70%)</option>
                     <option value="16">16 Months (85%)</option>
-                    <option value="Other">Other (دەستکاری قازانجی بکە)</option>
+                    <option value="Other" id="opt-other-plan">Other (دەستکاری قازانجی بکە)</option>
                 </select>
 
                 <div id="other-plan-section" style="display:none; margin-top:10px;">
@@ -352,12 +352,12 @@
     let activeScanner = null;
 
     const translations = {
-        bd: { mhead: "مینیو", tform: "فرۆشتنا نوی", lname: "ناڤێ کڕیاری", lphone: "موبایلا کڕیاری", lwitness: "ناڤێ دیدەڤانی", lwphone: "موبایلا دیدەڤانی", litem: " ئامێر/کاڵا", lbuy: "بهایێ فرۆتنێ", ldown: "پێشەکی", lduration: "ماوێ قیستێ", lmon: "قیست", ltotal: "کۆم", bsave: "تۆمارکرن", s1: "کۆگە", s4: "قازانج", srem: "ماوە", sannual: "تەخمینا ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: " ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "مەخزەن", bclose: "داخستن", search: "لێگەریان ب ناڤ یان ID...", inv_name: "ناڤێ ئامێری (Barcode)", inv_qty: "دانە", inv_add: "زێدەکرن", marchive: "ئەڕشیف", mtrash: "گلێش", mbackup: "سەیفکرنا ئێکسل", mrestore: "دووبارە زێدەکرن", mreports: "ڕاپۆرت", mabout: "گەشەپێدەر", mlogout: "چوونەدەر", mpc: "کۆمپیوتەر", mdark: "شەڤ", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەڤ سیستەمە ژ لایێ بژار ڕەشید هاتیە دروستکرن", other: "پشکێن دی", lsaletype: "جۆرێ فرۆشتنێ", custom_rate: "ڕێژەیا قازانجی %", custom_months: "هژمارا هەیڤان", rep_d: "ڕۆژانە", rep_m: "هەیڤانە", rep_y: "ساڵانە", rep_count: "هژمارا وەصلا", rep_total: "کۆما پارەی", click_visit: "بۆ دیتنا پۆرتبۆلیۆی کلیک بکە", rec_title: "وەصلا وەرگرتنێ", rec_cust: "کڕیار", rec_wit: "دیدەڤان", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەیا هەوە", notif_title: "ئاگەهداریێن قستان", notif_msg: "٣ ڕۆژ ماینە بۆ دانا قستێ", inv_cost: "بهایێ کڕینێ", out_of_stock: "ئەڤ کەلوپەلە د مەخزەنی دا نەماینە!" },
-        sr: { mhead: "مینیو", tform: "فرۆشتنی نوێ", lname: "ناوی کڕیار", lphone: "موبایلی کڕیار", lwitness: "ناوی دیدەڤان", lwphone: "موبایلی دیدەڤان", litem: "ئامێر", lbuy: "نرخی فرۆشتن", ldown: "پێشەکی", lduration: "ماوە", lmon: "قیست", ltotal: "کۆم", bsave: "پاشەکەوت", s1: "کۆگا", s4: "قازانج", srem: "ماوە", sannual: "ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "کۆگا", bclose: "داخستن", search: "گەڕان بە ناو یان ID...", inv_name: "ناوی کاڵا", inv_qty: "ژمارە", inv_add: "زیادکردن", marchive: "ئەرشیف", mtrash: "تەنەکەی خۆڵ", mbackup: "باکئەپی ئێکسل", mrestore: "گێڕانەوەی داتا", mreports: "ڕاپۆرتەکان", mabout: "دەربارەی سیستم", mlogout: "چوونەدەرەوە", mpc: "کۆمپیوتەر", mdark: "شەو", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەم سیستمە لەلایەن بژار ڕەشید دروست کراوە", other: "بەشەکانی تر", lsaletype: "جۆری فرۆشتن", custom_rate: "ڕێژەی قازانج %", custom_months: "مانگەکان", rep_d: "روزانه", rep_m: "مانگانە", rep_y: "ساڵانە", rep_count: "ژمارەی وەصڵ", rep_total: "کۆی پارە", click_visit: "بۆ بینینی پۆرتبۆلیۆ کلیک بکە", rec_title: "وەصڵی وەرگرتن", rec_cust: "کڕیار", rec_wit: "شایەت", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەکەتان", notif_title: "ئاگادارکەرەوەی قیستەکان", notif_msg: "٣ ڕۆژ ماوە بۆدانی قیست", inv_cost: "نرخی کڕین", out_of_stock: "ببوورە! ئەم کاڵایە لە کۆگا نەماوە" },
-        ar: { mhead: "القائمة", tform: "بيع جديد", lname: "اسم الزبون", lphone: "موبايل الزبون", lwitness: "اسم الشاهد", lwphone: "موبايل الشاهد", litem: "الجهاز", lbuy: "سعر البيع", ldown: "المقدمة", lduration: "المدة", lmon: "القسط", ltotal: "المجموع", bsave: "حفظ", s1: "المخزن", s4: "الأرباح", srem: "المتبقي", sannual: "سنوي", lnote: "ملاحظات", th1: "الزبون", th2: "الجهاز", th3: "المجموع", th_down: "مقدمة", th4: "الأقساط", th5: "إجراء", madd: "المخزن", bclose: "إغلاق", search: "بحث بالاسم او ID...", inv_name: "المادة", inv_qty: "الكمية", inv_add: "إضافة", marchive: "الأرشيف", mtrash: "المحذوفات", mbackup: "نسخ إكسل", mrestore: "استعادة", mreports: "التقارير", mabout: "حول المطور", mlogout: "خروج", mpc: "کمبيوتر", mdark: "ليلي", mlight: "نهاري", dev_role: "IT Specialist & Developer", dev_msg: "تم تطوير هذا النظام من قبل بژار رشيد", other: "أقسام أخرى", lsaletype: "نوع البيع", custom_rate: "الربح %", custom_months: "الأشهر", rep_d: "يومي", rep_m: "شهري", rep_y: "سنوي", rep_count: "الفواتير", rep_total: "إجمالي المبلغ", click_visit: "معرض الأعمال", rec_title: "وصل استلام", rec_cust: "الزبون", rec_wit: "الشاهد", rec_rem: "المتبقي", rec_msg: "شكراً لثقتكم بنا", notif_title: "تنبيهات الأقساط", notif_msg: "بقي 3 أيام لموعد القسط", inv_cost: "سعر الشراء", out_of_stock: "عذراً! المادة غير متوفرة" },
-        en: { mhead: "MENU", tform: "NEW SALE", lname: "CUSTOMER NAME", lphone: "PHONE", lwitness: "WITNESS", lwphone: "WIT PHONE", litem: "ITEM", lbuy: "PRICE", ldown: "DOWN", lduration: "PLAN", lmon: "MONTHLY", ltotal: "TOTAL", bsave: "SAVE", s1: "STOCK", s4: "PROFIT", srem: "REMAIN", sannual: "ANNUAL", lnote: "NOTES", th1: "NAME", th2: "ITEM", th3: "TOTAL", th_down: "DOWN", th4: "PAID", th5: "ACTION", madd: "INVENTORY", bclose: "CLOSE", search: "Search by Name or ID...", inv_name: "Item Name", inv_qty: "Qty", inv_add: "Add", marchive: "Archive", mtrash: "Trash", mbackup: "Backup", mrestore: "Restore", mreports: "Reports", mabout: "About", mlogout: "Logout", mpc: "PC Mode", mdark: "Dark", mlight: "Light", dev_role: "IT Specialist & Developer", dev_msg: "Developed by Bizhar Rasheed", other: "Other Items", lsaletype: "Sale Type", custom_rate: "Rate %", custom_months: "Months", rep_d: "Daily", rep_m: "Monthly", rep_y: "Yearly", rep_count: "Receipts", rep_total: "Total", click_visit: "Portfolio", rec_title: "RECEIPT", rec_cust: "Customer", rec_wit: "Witness", rec_rem: "Remain", rec_msg: "Thank you for your trust", notif_title: "Installment Alerts", notif_msg: "3 days left for payment", inv_cost: "Cost Price", out_of_stock: "Sorry! Item out of stock" },
-        tr: { mhead: "MENÜ", tform: "YENİ SATIŞ", lname: "MÜŞTERİ ADI", lphone: "TELEFON", lwitness: "ŞAHİT", lwphone: "ŞAHİT TEL", litem: "ÜRÜN", lbuy: "FİYAT", ldown: "PEŞİNAT", lduration: "VADE", lmon: "TAKSİT", ltotal: "TOPLAM", bsave: "KAYDET", s1: "STOK", s4: "KÂR", srem: "KALAN", sannual: "YILLIK", lnote: "NOTLAR", th1: "MÜŞTERİ", th2: "ÜRÜN", th3: "TOPLAM", th_down: "PEŞİN", th4: "ÖDENEN", th5: "İŞLEM", madd: "ENVANTER", bclose: "KAPAT", search: "İsim veya ID ile ara...", inv_name: "Ürün Adı", inv_qty: "Adet", inv_add: "Ekle", marchive: "Arşiv", mtrash: "Çöp Kutusu", mbackup: "Excel Yedek", mrestore: "Veri Yükle", mreports: "Raporlar", mabout: "Geliştirici", mlogout: "Çıkış Yap", mpc: "PC Modu", mdark: "Karanlık", mlight: "Aydınlık", dev_role: "IT Uzmanı", dev_msg: "Bizhar Rasheed tarafından tasarlanmıştır", other: "Diğer", lsaletype: "Satış Türü", custom_rate: "Kar %", custom_months: "Ay", rep_d: "Günlük", rep_m: "Aylık", rep_y: "Yıllık", rep_count: "Fiş", rep_total: "Toplam", click_visit: "Portfolyo", rec_title: "FİŞ", rec_cust: "Müşteri", rec_wit: "Şahit", rec_rem: "Kalan", rec_msg: "Teşekkürler", notif_title: "Vade Uyarıları", notif_msg: "Ödeme برای son 3 gün", inv_cost: "Maliyet", out_of_stock: "Stokta yok" },
-        fa: { mhead: "منو", tform: "فروش جدید", lname: "نام مشتری", lphone: "تلفن مشتری", lwitness: "نام شاهد", lwphone: "تلفن شاهد", litem: "کالا", lbuy: "قیمت فروش", ldown: "پیش‌پرداخت", lduration: "مدت", lmon: "قسط", ltotal: "مجموع", bsave: "ذخیره", s1: "انبار", s4: "سود", srem: "مانده", sannual: "سالانه", lnote: "یادداشت", th1: "مشتری", th2: "کالا", th3: "مجموع", th_down: "پیش‌پرداخت", th4: "پرداختی", th5: "عملیات", madd: "موجودی", bclose: "بستن", search: "جستجو با نام یا ID...", inv_name: "نام کالا", inv_qty: "تعداد", inv_add: "افزودن", marchive: "آرشیو", mtrash: "سطل زباله", mbackup: "خروجی اکسل", mrestore: "بازیابی", mreports: "گزارش‌ها", mabout: "توسعه‌دهنده", mlogout: "خروج", mpc: "حالت PC", mdark: "شب", mlight: "روز", dev_role: "متخصص IT", dev_msg: "طراحی شده توسط بژار رشید", other: "دیگر", lsaletype: "نوع فروش", custom_rate: "سود %", custom_months: "ماه", rep_d: "روزانه", rep_m: "ماهانه", rep_y: "سالانه", rep_count: "قبض", rep_total: "جمع", click_visit: "رزومه", rec_title: "رسید", rec_cust: "مشتری", rec_wit: "شاهد", rec_rem: "باقیمانده", rec_msg: "متشکریم", notif_title: "هشدار اقساط", notif_msg: "3 روز مانده به قسط", inv_cost: "قیمت خرید", out_of_stock: "موجود نیست" }
+        bd: { login_user: "ناڤێ بکارئینەری", login_pass: "پەیڤا نھێنی", login_btn: "چوونەژوور", mhead: "مینیو", tform: "فرۆشتنا نوی", lname: "ناڤێ کڕیاری", lphone: "موبایلا کڕیاری", lwitness: "ناڤێ دیدەڤانی", lwphone: "موبایلا دیدەڤانی", litem: " ئامێر/کاڵا", lbuy: "بهایێ فرۆتنێ", ldown: "پێشەکی", lduration: "ماوێ قیستێ", lmon: "قیست", ltotal: "کۆم", bsave: "تۆمارکرن", s1: "کۆگە", s4: "قازانج", srem: "ماوە", sannual: "تەخمینا ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: " ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "مەخزەن", bclose: "داخستن", search: "لێگەریان ب ناڤ یان ID...", inv_name: "ناڤێ ئامێری (Barcode)", inv_qty: "دانە", inv_add: "زێدەکرن", marchive: "ئەڕشیف", mtrash: "گلێش", mbackup: "سەیفکرنا ئێکسل", mbackup_json: "باکئەپ (JSON)", mpdf: "سەیفکرنا PDF", mrestore: "دووبارە زێدەکرن", mreports: "ڕاپۆرت", mabout: "گەشەپێدەر", mlogout: "چوونەدەر", mpc: "کۆمپیوتەر", mdark: "شەڤ", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەڤ سیستەمە ژ لایێ بژار ڕەشید هاتیە دروستکرن", other: "پشکێن دی", lsaletype: "جۆرێ فرۆشتنێ", opt_inst: "Installments (بقیست)", opt_cash: "Cash (کاش)", opt_other_plan: "پشکێن دی (دەستکاری)", custom_rate: "ڕێژەیا قازانجی %", custom_months: "هژمارا هەیڤان", rep_d: "ڕۆژانە", rep_m: "هەیڤانە", rep_y: "ساڵانە", rep_count: "هژمارا وەصلا", rep_total: "کۆما پارەی", click_visit: "بۆ دیتنا پۆرتبۆلیۆی کلیک بکە", rec_title: "وەصلا وەرگرتنێ", rec_cust: "کڕیار", rec_wit: "دیدەڤان", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەیا هەوە", notif_title: "ئاگەهداریێن قستان", notif_msg: "٣ ڕۆژ ماینە بۆ دانا قستێ", inv_cost: "بهایێ کڕینێ", out_of_stock: "ئەڤ کەلوپەلە د مەخزەنی دا نەماینە!" },
+        sr: { login_user: "ناوی بەکارهێنەر", login_pass: "وشەی نهێنی", login_btn: "چوونەژوورەوە", mhead: "مینیو", tform: "فرۆشتنی نوێ", lname: "ناوی کڕیار", lphone: "موبایلی کڕیار", lwitness: "ناوی دیدەڤان", lwphone: "موبایلی دیدەڤان", litem: "ئامێر", lbuy: "نرخی فرۆشتن", ldown: "پێشەکی", lduration: "ماوە", lmon: "قیست", ltotal: "کۆم", bsave: "پاشەکەوت", s1: "کۆگا", s4: "قازانج", srem: "ماوە", sannual: "ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "کۆگا", bclose: "داخستن", search: "گەڕان بە ناو یان ID...", inv_name: "ناوی کاڵا", inv_qty: "ژمارە", inv_add: "زیادکردن", marchive: "ئەرشیف", mtrash: "تەنەکەی خۆڵ", mbackup: "باکئەپی ئێکسل", mbackup_json: "باکئەپ (JSON)", mpdf: "باکئەپی PDF", mrestore: "گێڕانەوەی داتا", mreports: "ڕاپۆرتەکان", mabout: "دەربارەی سیستم", mlogout: "چوونەدەرەوە", mpc: "کۆمپیوتەر", mdark: "شەو", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەم سیستمە لەلایەن بژار ڕەشید دروست کراوە", other: "بەشەکانی تر", lsaletype: "جۆری فرۆشتن", opt_inst: "قست", opt_cash: "نەقد", opt_other_plan: "دەستکاری", custom_rate: "ڕێژەی قازانج %", custom_months: "مانگەکان", rep_d: "ڕۆژانە", rep_m: "مانگانە", rep_y: "ساڵانە", rep_count: "ژمارەی وەصڵ", rep_total: "کۆی پارە", click_visit: "بۆ بینینی پۆرتبۆلیۆ کلیک بکە", rec_title: "وەصڵی وەرگرتن", rec_cust: "کڕیار", rec_wit: "شایەت", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەکەتان", notif_title: "ئاگادارکەرەوەی قیستەکان", notif_msg: "٣ ڕۆژ ماوە بۆدانی قیست", inv_cost: "نرخی کڕین", out_of_stock: "ببوورە! ئەم کاڵایە لە کۆگا نەماوە" },
+        ar: { login_user: "اسم المستخدم", login_pass: "كلمة المرور", login_btn: "تسجيل الدخول", mhead: "القائمة", tform: "بيع جديد", lname: "اسم الزبون", lphone: "موبايل الزبون", lwitness: "اسم الشاهد", lwphone: "موبايل الشاهد", litem: "الجهاز", lbuy: "سعر البيع", ldown: "المقدمة", lduration: "المدة", lmon: "القسط", ltotal: "المجموع", bsave: "حفظ", s1: "المخزن", s4: "الأرباح", srem: "المتبقي", sannual: "سنوي", lnote: "ملاحظات", th1: "الزبون", th2: "الجهاز", th3: "المجموع", th_down: "مقدمة", th4: "الأقساط", th5: "إجراء", madd: "المخزن", bclose: "إغلاق", search: "بحث بالاسم او ID...", inv_name: "المادة", inv_qty: "الكمية", inv_add: "إضافة", marchive: "الأرشيف", mtrash: "المحذوفات", mbackup: "نسخة إكسل", mbackup_json: "نسخة JSON", mpdf: "نسخة PDF", mrestore: "استعادة", mreports: "التقارير", mabout: "حول المطور", mlogout: "خروج", mpc: "کمبيوتر", mdark: "ليلي", mlight: "نهاري", dev_role: "IT Specialist & Developer", dev_msg: "تم تطوير هذا النظام من قبل بژار رشيد", other: "أقسام أخرى", lsaletype: "نوع البيع", opt_inst: "أقساط", opt_cash: "نقدي", opt_other_plan: "تعديل يدوي", custom_rate: "الربح %", custom_months: "الأشهر", rep_d: "يومي", rep_m: "شهري", rep_y: "سنوي", rep_count: "الفواتير", rep_total: "إجمالي المبلغ", click_visit: "معرض الأعمال", rec_title: "وصل استلام", rec_cust: "الزبون", rec_wit: "الشاهد", rec_rem: "المتبقي", rec_msg: "شكراً لثقتكم بنا", notif_title: "تنبيهات الأقساط", notif_msg: "بقي 3 أيام لموعد القسط", inv_cost: "سعر الشراء", out_of_stock: "عذراً! المادة غير متوفرة" },
+        en: { login_user: "USERNAME", login_pass: "PASSWORD", login_btn: "LOGIN", mhead: "MENU", tform: "NEW SALE", lname: "CUSTOMER NAME", lphone: "PHONE", lwitness: "WITNESS", lwphone: "WIT PHONE", litem: "ITEM", lbuy: "PRICE", ldown: "DOWN", lduration: "PLAN", lmon: "MONTHLY", ltotal: "TOTAL", bsave: "SAVE", s1: "STOCK", s4: "PROFIT", srem: "REMAIN", sannual: "ANNUAL", lnote: "NOTES", th1: "NAME", th2: "ITEM", th3: "TOTAL", th_down: "DOWN", th4: "PAID", th5: "ACTION", madd: "INVENTORY", bclose: "CLOSE", search: "Search by Name or ID...", inv_name: "Item Name", inv_qty: "Qty", inv_add: "Add", marchive: "Archive", mtrash: "Trash", mbackup: "Excel", mbackup_json: "Backup JSON", mpdf: "PDF", mrestore: "Restore", mreports: "Reports", mabout: "About", mlogout: "Logout", mpc: "PC Mode", mdark: "Dark", mlight: "Light", dev_role: "IT Specialist & Developer", dev_msg: "Developed by Bizhar Rasheed", other: "Other Items", lsaletype: "Sale Type", opt_inst: "Installments", opt_cash: "Cash", opt_other_plan: "Other", custom_rate: "Rate %", custom_months: "Months", rep_d: "Daily", rep_m: "Monthly", rep_y: "Yearly", rep_count: "Receipts", rep_total: "Total", click_visit: "Portfolio", rec_title: "RECEIPT", rec_cust: "Customer", rec_wit: "Witness", rec_rem: "Remain", rec_msg: "Thank you for your trust", notif_title: "Installment Alerts", notif_msg: "3 days left for payment", inv_cost: "Cost Price", out_of_stock: "Sorry! Item out of stock" },
+        tr: { login_user: "Kullanıcı Adı", login_pass: "Şifre", login_btn: "Giriş Yap", mhead: "MENÜ", tform: "YENİ SATIŞ", lname: "MÜŞTERİ ADI", lphone: "TELEFON", lwitness: "ŞAHİT", lwphone: "ŞAHİT TEL", litem: "ÜRÜN", lbuy: "FİYAT", ldown: "PEŞİNAT", lduration: "VADE", lmon: "TAKSİT", ltotal: "TOPLAM", bsave: "KAYDET", s1: "STOK", s4: "KÂR", srem: "KALAN", sannual: "YILLIK", lnote: "NOTLAR", th1: "MÜŞTERİ", th2: "ÜRÜN", th3: "TOPLAM", th_down: "PEŞİN", th4: "ÖDENEN", th5: "İŞLEM", madd: "ENVANTER", bclose: "KAPAT", search: "İsim veya ID ile ara...", inv_name: "Ürün Adı", inv_qty: "Adet", inv_add: "Ekle", marchive: "Arşiv", mtrash: "Çöp Kutusu", mbackup: "Excel", mbackup_json: "JSON Yedek", mpdf: "PDF Yedek", mrestore: "Veri Yükle", mreports: "Raporlar", mabout: "Geliştirici", mlogout: "Çıkış Yap", mpc: "PC Modu", mdark: "Karanlık", mlight: "Aydınlık", dev_role: "IT Uzmanı", dev_msg: "Bizhar Rasheed tarafından tasarlanmıştır", other: "Diğer", lsaletype: "Satış Türü", opt_inst: "Taksitli", opt_cash: "Peşin", opt_other_plan: "Diğer", custom_rate: "Kar %", custom_months: "Ay", rep_d: "Günlük", rep_m: "Aylık", rep_y: "Yıllık", rep_count: "Fiş", rep_total: "Toplam", click_visit: "Portfolyo", rec_title: "FİŞ", rec_cust: "Müşteri", rec_wit: "Şahit", rec_rem: "Kalan", rec_msg: "Teşekkürler", notif_title: "Vade Uyarıları", notif_msg: "Ödeme برای son 3 gün", inv_cost: "Maliyet", out_of_stock: "Stokta yok" },
+        fa: { login_user: "نام کاربری", login_pass: "گذرواژه", login_btn: "ورود", mhead: "منو", tform: "فروش جدید", lname: "نام مشتری", lphone: "تلفن مشتری", lwitness: "نام شاهد", lwphone: "تلفن شاهد", litem: "کالا", lbuy: "قیمت فروش", ldown: "پیش‌پرداخت", lduration: "مدت", lmon: "قسط", ltotal: "مجموع", bsave: "ذخیره", s1: "انبار", s4: "سود", srem: "مانده", sannual: "سالانه", lnote: "یادداشت", th1: "مشتری", th2: "کالا", th3: "مجموع", th_down: "پیش‌پرداخت", th4: "پرداختی", th5: "عملیات", madd: "موجودی", bclose: "بستن", search: "جستجو با نام یا ID...", inv_name: "نام کالا", inv_qty: "تعداد", inv_add: "افزودن", marchive: "آرشیو", mtrash: "سطل زباله", mbackup: "اکسل", mbackup_json: "فایل JSON", mpdf: "فایل PDF", mrestore: "بازیابی", mreports: "گزارش‌ها", mabout: "توسعه‌دهنده", mlogout: "خروج", mpc: "حالت PC", mdark: "شب", mlight: "روز", dev_role: "متخصص IT", dev_msg: "طراحی شده توسط بژار رشید", other: "دیگر", lsaletype: "نوع فروش", opt_inst: "اقساطی", opt_cash: "نقدی", opt_other_plan: "سایر", custom_rate: "سود %", custom_months: "ماه", rep_d: "روزانه", rep_m: "ماهانه", rep_y: "سالانه", rep_count: "قبض", rep_total: "جمع", click_visit: "رزومه", rec_title: "رسید", rec_cust: "مشتری", rec_wit: "شاهد", rec_rem: "باقیمانده", rec_msg: "متشکریم", notif_title: "هشدار اقساط", notif_msg: "3 روز مانده به قسط", inv_cost: "قیمت خرید", out_of_stock: "موجود نیست" }
     };
 
     window.onload = () => { if(localStorage.getItem("bizhar_logged") === "true") document.getElementById('login-overlay').style.display = 'none'; applyLang(); toggleSaleMode(); };
@@ -547,7 +547,7 @@
             </div>
             <div class="print-settings">
                 <div><label style="font-size:12px; font-weight:bold;">PAPER</label><select id="print-size-sel"><option value="80mm">80mm</option><option value="58mm">58mm</option></select></div>
-                <div><label style="font-size:12px; font-weight:bold;">ORIENT</label><select id="print-size-sel"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></div>
+                <div><label style="font-size:12px; font-weight:bold;">ORIENT</label><select id="print-orient-sel"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></div>
             </div>
             <button class="main-btn" id="print-btn-exec"><i class="fa-solid fa-print"></i> PRINT</button>
         `;
@@ -717,33 +717,66 @@
         const l = translations[document.getElementById('lang-sel').value] || translations.bd; 
         const isLtr = ['en','tr'].includes(document.getElementById('lang-sel').value);
         document.body.dir = isLtr ? "ltr" : "rtl";
+        
+        // Header & Menu
         document.getElementById('m-header').innerText = l.mhead; 
+        document.getElementById('m-archive').innerText = l.marchive; 
+        document.getElementById('m-trash').innerText = l.mtrash; 
+        document.getElementById('m-backup').innerText = l.mbackup; 
+        document.getElementById('m-backup-json').innerText = l.mbackup_json;
+        document.getElementById('m-pdf').innerText = l.mpf || "PDF";
+        document.getElementById('m-restore').innerText = l.mrestore; 
+        document.getElementById('m-add').innerText = l.madd; 
+        document.getElementById('m-reports').innerText = l.mreports; 
+        document.getElementById('m-about').innerText = l.mabout; 
+        document.getElementById('m-logout').innerText = l.mlogout; 
+        document.getElementById('m-pc').innerText = l.mpc; 
+        document.getElementById('btn-close').innerText = l.bclose;
+
+        // Login Overlay
+        document.getElementById('login-user').placeholder = l.login_user;
+        document.getElementById('login-pass').placeholder = l.login_pass;
+        document.getElementById('login-btn').innerText = l.login_btn;
+
+        // Sale Form
         document.getElementById('t-form').innerHTML = `<i class="fa-solid fa-cart-plus"></i> ${l.tform}`;
         document.getElementById('l-sale-type').innerText = l.lsaletype;
+        document.getElementById('opt-inst').innerText = l.opt_inst;
+        document.getElementById('opt-cash').innerText = l.opt_cash;
         document.getElementById('l-name').innerText = l.lname; 
         document.getElementById('l-phone').innerText = l.lphone;
         document.getElementById('l-witness').innerText = l.lwitness;
         document.getElementById('l-witness-phone').innerText = l.lwphone;
         document.getElementById('l-item').innerText = l.litem;
-        document.getElementById('l-buy').innerText = l.lbuy; document.getElementById('l-down').innerText = l.ldown;
-        document.getElementById('l-duration').innerText = l.lduration; document.getElementById('l-mon').innerText = l.lmon;
+        document.getElementById('l-buy').innerText = l.lbuy; 
+        document.getElementById('l-down').innerText = l.ldown;
+        document.getElementById('l-duration').innerText = l.lduration; 
+        document.getElementById('opt-other-plan').innerText = l.opt_other_plan;
         document.getElementById('l-other-rate').innerText = l.custom_rate;
         document.getElementById('l-other-months').innerText = l.custom_months;
-        document.getElementById('l-total-box').innerText = l.ltotal; document.getElementById('b-save').innerText = l.bsave; 
-        document.getElementById('s1').innerText = l.s1; document.getElementById('s4').innerHTML = `${l.s4} <i class="fa-solid fa-eye privacy-toggle" onclick="togglePrivacy()"></i>`;
-        document.getElementById('s-rem').innerText = l.srem; document.getElementById('s-annual').innerText = l.sannual;
         document.getElementById('l-note-title').innerText = l.lnote;
-        document.getElementById('th1').innerText = l.th1; document.getElementById('th2').innerText = l.th2; 
-        document.getElementById('th3').innerText = l.th3; document.getElementById('th_down').innerText = l.th_down; 
-        document.getElementById('th4').innerText = l.th4; document.getElementById('th5').innerText = l.th5; 
-        document.getElementById('m-archive').innerText = l.marchive; document.getElementById('m-trash').innerText = l.mtrash; 
-        document.getElementById('m-backup').innerText = l.mbackup; document.getElementById('m-restore').innerText = l.mrestore; 
-        document.getElementById('m-add').innerText = l.madd; document.getElementById('m-reports').innerText = l.mreports; 
-        document.getElementById('m-about').innerText = l.mabout; document.getElementById('m-logout').innerText = l.mlogout; 
-        document.getElementById('m-pc').innerText = l.mpc; 
+        document.getElementById('l-total-box').innerText = l.ltotal; 
+        document.getElementById('l-mon').innerText = l.lmon;
+        document.getElementById('b-save').innerText = l.bsave; 
+
+        // Stats & Search
+        document.getElementById('s1').innerText = l.s1; 
+        document.getElementById('s4').innerHTML = `${l.s4} <i class="fa-solid fa-eye privacy-toggle" onclick="togglePrivacy()"></i>`;
+        document.getElementById('s-rem').innerText = l.srem; 
+        document.getElementById('s-annual').innerText = l.sannual;
+        document.getElementById('search-input').placeholder = l.search;
+
+        // Table Headers
+        document.getElementById('th1').innerText = l.th1; 
+        document.getElementById('th2').innerText = l.th2; 
+        document.getElementById('th3').innerText = l.th3; 
+        document.getElementById('th_down').innerText = l.th_down; 
+        document.getElementById('th4').innerText = l.th4; 
+        document.getElementById('th5').innerText = l.th5; 
+
         const isDark = document.body.classList.contains('dark-mode');
         document.getElementById('m-dark').innerText = isDark ? l.mlight : l.mdark;
-        document.getElementById('btn-close').innerText = l.bclose; document.getElementById('search-input').placeholder = l.search;
+        
         render();
     }
 
