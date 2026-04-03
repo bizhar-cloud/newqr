@@ -12,6 +12,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -34,6 +36,38 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans Arabic', 'Roboto', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; overflow-x: hidden; }
+
+        /* Toast Styling */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--card);
+            color: var(--text);
+            padding: 12px 25px;
+            border-radius: 15px;
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toast-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), toast-out 0.4s 2.5s forwards;
+            min-width: 250px;
+            justify-content: center;
+        }
+        .toast.success { border-color: var(--success); color: var(--success); }
+        .toast.danger { border-color: var(--danger); color: var(--danger); }
+        @keyframes toast-in { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes toast-out { from { transform: translateY(0); opacity: 1; } to { transform: translateY(100px); opacity: 0; } }
 
         #login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 999999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
         .login-box { background: var(--card); padding: 40px; border-radius: 30px; border: 2px solid var(--neon-blue); width: 350px; text-align: center; box-shadow: 0 0 50px rgba(0,210,255,0.2); }
@@ -79,6 +113,7 @@
         input, select, textarea { width: 100%; padding: 14px; border: 1.5px solid var(--border); border-radius: 15px; background: var(--bg); color: var(--text); margin-top: 8px; outline: none; font-size: 16px; font-family: inherit; }
 
         .main-btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 900; background: linear-gradient(45deg, var(--primary), var(--neon-blue)); color: white; margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .main-btn:disabled { background: #94a3b8; cursor: not-allowed; }
         
         .table-wrap { background: var(--card); border-radius: 25px; overflow-x: auto; border: 1.5px solid var(--border); }
         table { width: 100%; border-collapse: collapse; min-width: 850px; }
@@ -188,13 +223,22 @@
             align-items: center;
         }
 
-        /* Styles for document upload */
         .upload-area { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
         .upload-btn { background: #475569; color: white; border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
         #doc-preview { width: 100%; max-height: 200px; object-fit: contain; border-radius: 15px; margin-top: 10px; display: none; border: 2px solid var(--border); }
+        
+        /* Cyber-Glass Delete Confirmation Styles */
+        .confirm-box { text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 20px; backdrop-filter: blur(5px); }
+        .confirm-box i { font-size: 3rem; color: var(--danger); margin-bottom: 15px; }
+        .confirm-actions { display: flex; gap: 10px; margin-top: 25px; }
+        .confirm-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; }
+        .btn-yes { background: var(--danger); color: white; }
+        .btn-no { background: #475569; color: white; }
     </style>
 </head>
 <body>
+
+<div id="toast-container"></div>
 
 <div id="login-overlay">
     <div class="login-box">
@@ -224,19 +268,23 @@
         <h4 id="m-header" style="text-align:center; color:var(--neon-blue); margin-bottom:20px; font-weight: 900;">MENU</h4>
         <button class="menu-item" onclick="toggleLayout()"><i class="fa-solid fa-display"></i> <span id="m-pc">PC Mode</span></button>
         <button class="menu-item" onclick="toggleDark()"><i id="mode-icon" class="fa-solid fa-moon"></i> <span id="m-dark">Dark Mode</span></button>
-        <button class="menu-item" onclick="showReports('daily')"><i class="fa-solid fa-chart-line"></i> <span id="m-reports">Reports</span></button>
-        <button class="menu-item" onclick="showDailyClosing()"><i class="fa-solid fa-cash-register"></i> <span id="m-closing">Daily Closing</span></button>
-        <button class="menu-item" onclick="showCashDrawer()"><i class="fa-solid fa-vault"></i> <span id="m-vault">Cash Drawer</span></button>
-        <button class="menu-item" onclick="showArchive()"><i class="fa-solid fa-folder-open"></i> <span id="m-archive">Archive</span></button>
-        <button class="menu-item" onclick="showRecycleBin()"><i class="fa-solid fa-trash-can"></i> <span id="m-trash">Recycle Bin</span></button>
-        <button class="menu-item" onclick="checkInvPass()"><i class="fa-solid fa-boxes-stacked"></i> <span id="m-add">Inventory</span></button>
-        <button class="menu-item" onclick="showLabelMaker()"><i class="fa-solid fa-tags"></i> <span id="m-label">Label Maker</span></button>
-        <hr style="border: 0.5px solid var(--border); margin: 15px 0;">
-        <button class="menu-item" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> <span id="m-backup">Export Excel</span></button>
-        <button class="menu-item" onclick="exportJSON()"><i class="fa-solid fa-file-code"></i> <span id="m-backup-json">Backup (JSON)</span></button>
-        <button class="menu-item" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> <span id="m-pdf">Export PDF</span></button>
-        <button class="menu-item" onclick="triggerRestore()"><i class="fa-solid fa-cloud-arrow-up"></i> <span id="m-restore">Restore Data</span></button>
-        <input type="file" id="restore-input" style="display:none" accept=".json" onchange="restoreData(event)">
+        
+        <div id="admin-only-menu">
+            <button class="menu-item" onclick="showReports('daily')"><i class="fa-solid fa-chart-line"></i> <span id="m-reports">Reports</span></button>
+            <button class="menu-item" onclick="showDailyClosing()"><i class="fa-solid fa-cash-register"></i> <span id="m-closing">Daily Closing</span></button>
+            <button class="menu-item" onclick="showCashDrawer()"><i class="fa-solid fa-vault"></i> <span id="m-vault">Cash Drawer</span></button>
+            <button class="menu-item" onclick="showArchive()"><i class="fa-solid fa-folder-open"></i> <span id="m-archive">Archive</span></button>
+            <button class="menu-item" onclick="showRecycleBin()"><i class="fa-solid fa-trash-can"></i> <span id="m-trash">Recycle Bin</span></button>
+            <button class="menu-item" onclick="checkInvPass()"><i class="fa-solid fa-boxes-stacked"></i> <span id="m-add">Inventory</span></button>
+            <button class="menu-item" onclick="showLabelMaker()"><i class="fa-solid fa-tags"></i> <span id="m-label">Label Maker</span></button>
+            <hr style="border: 0.5px solid var(--border); margin: 15px 0;">
+            <button class="menu-item" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> <span id="m-backup">Export Excel</span></button>
+            <button class="menu-item" onclick="exportJSON()"><i class="fa-solid fa-file-code"></i> <span id="m-backup-json">Backup (JSON)</span></button>
+            <button class="menu-item" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> <span id="m-pdf">Export PDF</span></button>
+            <button class="menu-item" onclick="triggerRestore()"><i class="fa-solid fa-cloud-arrow-up"></i> <span id="m-restore">Restore Data</span></button>
+            <input type="file" id="restore-input" style="display:none" accept=".json" onchange="restoreData(event)">
+        </div>
+
         <button class="menu-item" onclick="showAbout()"><i class="fa-solid fa-user-gear"></i> <span id="m-about">Developer</span></button>
         
         <select id="lang-sel" onchange="applyLang()">
@@ -272,7 +320,7 @@
             <input type="tel" id="i-phone" placeholder="0750 xxx xxxx" pattern="[0-9]*">
 
             <div class="upload-area">
-                <label style="font-weight: 700; display: block;">CUSTOMER DOCUMENT (ناسنامە)</label>
+                <label style="font-weight: 700; display: block;" id="l-upload-label">CUSTOMER DOCUMENT (ناسنامە)</label>
                 <button class="upload-btn" onclick="document.getElementById('doc-file').click()">
                     <i class="fa-solid fa-camera"></i> <span id="l-upload-text">TAKE PHOTO / UPLOAD</span>
                 </button>
@@ -332,23 +380,23 @@
                 <div style="text-align:center;"><small id="l-total-box" style="color:#64748b;">TOTAL</small><div id="o-total" style="font-weight:900; font-size:24px;">$0</div></div>
                 <div id="monthly-output-section" style="text-align:center;"><small id="l-mon" style="color:#64748b;">MONTHLY</small><div id="o-mon" style="font-weight:900; color:var(--primary); font-size:24px;">$0</div></div>
             </div>
-            <button class="main-btn" onclick="saveSale()"><i class="fa-solid fa-floppy-disk"></i> <span id="b-save">SAVE</span></button>
+            <button class="main-btn" id="save-sale-btn" onclick="saveSale()"><i class="fa-solid fa-floppy-disk"></i> <span id="b-save">SAVE</span></button>
         </div>
     </div>
 
     <div id="main-p">
-        <div class="stats-grid">
+        <div class="stats-grid" id="stats-container">
             <div class="stat-card" style="border-bottom: 5px solid var(--neon-blue);">
                 <small id="s1">STOCK</small><h3 id="v1" style="color:var(--neon-blue)">0</h3>
             </div>
-            <div class="stat-card" style="border-bottom: 5px solid var(--success);">
+            <div class="stat-card admin-feature" style="border-bottom: 5px solid var(--success);">
                 <small id="s4">PROFIT <i class="fa-solid fa-eye privacy-toggle" onclick="togglePrivacy()"></i></small>
                 <h3 id="v4" style="color:var(--success)">****</h3>
             </div>
             <div class="stat-card" style="border-bottom: 5px solid var(--neon-purple);">
                 <small id="s-rem">OUTSTANDING</small><h3 id="v-rem" style="color:var(--neon-purple)">$0</h3>
             </div>
-            <div class="stat-card" style="border-bottom: 5px solid #f59e0b;">
+            <div class="stat-card admin-feature" style="border-bottom: 5px solid #f59e0b;">
                 <small id="s-annual">YEARLY FORECAST</small><h3 id="v-annual" style="color:#f59e0b">****</h3>
             </div>
         </div>
@@ -363,7 +411,7 @@
 </div>
 
 <div class="modal" id="modal-universal">
-    <div class="modal-card">
+    <div class="modal-card" id="modal-card-element">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
             <h2 id="modal-title" style="color:var(--neon-blue); font-weight: 900;">TITLE</h2>
             <button onclick="closeModal()" style="background:var(--danger); border:none; color:white; width: 40px; height: 40px; border-radius: 50%; cursor:pointer;">&times;</button>
@@ -375,25 +423,100 @@
 <div id="print-area"></div>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://bizhar-pos-default-rtdb.firebaseio.com/" };
+    const firebaseConfig = { 
+        databaseURL: "https://bizhar-pos-default-rtdb.firebaseio.com/",
+        storageBucket: "bizhar-pos.appspot.com"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const storage = firebase.storage();
     
     let inv = [], sales = [], archive = [], trash = [], reports = [], privacyHidden = true;
     let isInventoryOpen = false; 
-    let currentDocBase64 = ""; 
+    let currentDocFile = null; 
     const SECRET_KEY = "07503644666";
     let activeScanner = null;
 
+    // Toast Notification Function
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icon = type === 'success' ? 'fa-circle-check' : (type === 'danger' ? 'fa-circle-xmark' : 'fa-circle-info');
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // --- Role Management ---
+    let currentUserRole = "Cashier"; 
+
     const translations = {
-        bd: { login_user: "ناڤێ بکارئینەری", login_pass: "پەیڤا نھێنی", login_btn: "چوونەژوور", mhead: "مینیو", tform: "فرۆشتنا نوی", lname: "ناڤێ کڕیاری", lphone: "موبایلا کڕیاری", lwitness: "ناڤێ دیدەڤانی", lwphone: "موبایلا دیدەڤانی", litem: " ئامێر/کاڵا", lbuy: "بهایێ فرۆتنێ", ldown: "پێشەکی", lduration: "ماوێ قیستێ", lmon: "قیست", ltotal: "کۆم", bsave: "تۆمارکرن", s1: "کۆگە", s4: "قازانج", srem: "ماوە", sannual: "تەخمینا ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: " ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "مەخزەن", bclose: "داخستن", search: "لێگەریان ب ناڤ یان ID...", inv_name: "ناڤێ ئامێری (Barcode)", inv_qty: "دانە", inv_add: "زێدەکرن", marchive: "ئەڕشیف", mtrash: "گلێش", mbackup: "سەیفکرنا ئێکسل", mbackup_json: "باکئەپ (JSON)", mpdf: "سەیفکرنا PDF", mrestore: "دووبارە زێدەکرن", mreports: "ڕاپۆرت", mabout: "گەشەپێدەر", mlogout: "چوونەدەر", mpc: "کۆمپیوتەر", mdark: "شەڤ", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەڤ سیستەمە ژ لایێ بژار ڕەشید هاتیە دروستکرن", other: "پشکێن دی", lsaletype: "جۆرێ فرۆشتنێ", opt_inst: "Installments (بقیست)", opt_cash: "Cash (کاش)", opt_debt: "Debt (قەرز/دەین)", opt_other_plan: "پشکێن دی (دەستکاری)", custom_rate: "ڕێژەیا قازانجی %", custom_months: "هژمارا هەیڤان", rep_d: "ڕۆژانە", rep_w: "هەفتیانە", rep_m: "هەیڤانە", rep_y: "ساڵانە", rep_count: "هژمارا وەصلا", rep_total: "کۆما پارەی", click_visit: "بۆ دیتنا پۆرتبۆلیۆی کلیک بکە", rec_title: "وەصلا وەرگرتنێ", rec_cust: "کڕیار", rec_wit: "دیدەڤان", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەیا هەوە", notif_title: "ئاگەهداریێن قستان", notif_msg: "٣ ڕۆژ ماینە بۆ دانا قستێ", inv_cost: "بهایێ کڕینێ", out_of_stock: "ئەڤ کەلوپەلە د مەخزەنی دا نەماینە!", mlabel: "چاپکرنا لەیبلا", invalid_phone: "ژمارەیا موبایلێ یا خەلەتە!", save_error: "کێشەیەک ل دەمێ سەیفکرنێ پەیدابوو! ئینتەرنێتێ کۆنترۆل بکە.", h_title: "دیرۆکا پارەدانێ", mclosing: "داخستنا سندوقێ", lupload: "بارکرنا ناسنامێ", mvault: "سندوق" },
-        sr: { login_user: "ناوی بەکارهێنەر", login_pass: "وشەی نهێنی", login_btn: "چوونەژوورەوە", mhead: "مینیو", tform: "فرۆشتنی نوێ", lname: "ناوی کڕیار", lphone: "موبایلی کڕیار", lwitness: "ناوی دیدەڤان", lwphone: "موبایلی دیدەڤان", litem: "ئامێر", lbuy: "نرخی فرۆشتنی", ldown: "پێشەکی", lduration: "ماوە", lmon: "قیست", ltotal: "کۆم", bsave: "پاشەکەوت", s1: "کۆگا", s4: "قازانج", srem: "ماوە", sannual: "ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "کۆگا", bclose: "داخستن", search: "گەڕان بە ناو یان ID...", inv_name: "ناوی کاڵا", inv_qty: "ژمارە", inv_add: "زیادکردن", marchive: "ئەرشیف", mtrash: "تەنەکەی خۆڵ", mbackup: "باکئەپی ئێکسل", mbackup_json: "باکئەپ (JSON)", mpdf: "باکئەپی PDF", mrestore: "گێڕانەوەی داتا", mreports: "ڕاپۆرتەکان", mabout: "دەربارەی سیستم", mlogout: "چوونەدەرەوە", mpc: "کۆمپیوتەر", mdark: "شەو", mlight: "ڕۆژ", dev_role: "IT Specialist & Developer", dev_msg: "ئەم سیستمە لەلایەن بژار ڕەشید دروست کراوە", other: "بەشەکانی تر", lsaletype: "جۆری فرۆشتن", opt_inst: "قست", opt_cash: "نەقد", opt_debt: "قەرز", opt_other_plan: "دەستکاری", custom_rate: "ڕێژەی قازانج %", custom_months: "مانگەکان", rep_d: "ڕۆژانە", rep_w: "هەفتانە", rep_m: "مانگانە", rep_y: "ساڵانە", rep_count: "ژمارەی وەصڵ", rep_total: "کۆیی پارە", click_visit: "بۆ بینینی پۆرتبۆلیۆ کلیک بکە", rec_title: "وەصڵی وەرگرتن", rec_cust: "کڕیار", rec_wit: "شایەت", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەکەتان", notif_title: "ئاگادارکەرەوەی قیستەکان", notif_msg: "٣ ڕۆژ ماوە بۆدانی قیست", inv_cost: "نرخی کڕین", out_of_stock: "ببوورە! ئەم کاڵایە لە کۆگا نەماوە", mlabel: "چاپکردنی لەیبڵ", invalid_phone: "ژمارەی مۆبایلەکە هەڵەیە!", save_error: "کێشەیەک لە پاشەکەوتکردن هەبوو! ئینتەرنێتەکەت کۆنترۆڵ بکە.", h_title: "مێژووی قیستەکان", mclosing: "داخستنی سندوق", lupload: "بارکردنی ناسنامە", mvault: "سندوق" },
-        en: { login_user: "USERNAME", login_pass: "PASSWORD", login_btn: "LOGIN", mhead: "MENU", tform: "NEW SALE", lname: "CUSTOMER NAME", lphone: "PHONE", lwitness: "WITNESS", lwphone: "WIT PHONE", litem: "ITEM", lbuy: "PRICE", ldown: "DOWN", lduration: "PLAN", lmon: "MONTHLY", ltotal: "TOTAL", bsave: "SAVE", s1: "STOCK", s4: "PROFIT", srem: "REMAIN", sannual: "ANNUAL", lnote: "NOTES", th1: "NAME", th2: "ITEM", th3: "TOTAL", th_down: "DOWN", th4: "PAID", th5: "ACTION", madd: "INVENTORY", bclose: "CLOSE", search: "Search by Name or ID...", inv_name: "Item Name", inv_qty: "Qty", inv_add: "Add", marchive: "Archive", mtrash: "Trash", mbackup: "Excel", mbackup_json: "Backup JSON", mpdf: "PDF", mrestore: "Restore", mreports: "Reports", mabout: "About", mlogout: "Logout", mpc: "PC Mode", mdark: "Dark", mlight: "Light", dev_role: "IT Specialist & Developer", dev_msg: "Developed by Bizhar Rasheed", other: "Other Items", lsaletype: "Sale Type", opt_inst: "Installments", opt_cash: "Cash", opt_debt: "Debt", opt_other_plan: "Other", custom_rate: "Rate %", custom_months: "Months", rep_d: "Daily", rep_w: "Weekly", rep_m: "Monthly", rep_y: "Yearly", rep_count: "Receipts", rep_total: "Total", click_visit: "Portfolio", rec_title: "RECEIPT", rec_cust: "Customer", rec_wit: "Witness", rec_rem: "Remain", rec_msg: "Thank you for your trust", notif_title: "Installment Alerts", notif_msg: "3 days left for payment", inv_cost: "Cost Price", out_of_stock: "Sorry! Item out of stock", mlabel: "Label Maker", invalid_phone: "Invalid phone number!", save_error: "Save failed!", h_title: "Payment Ledger", mclosing: "Daily Closing", lupload: "Upload Document", mvault: "Cash Drawer" }
+        bd: { login_user: "ناڤێ بکارئینەری", login_pass: "پەیڤا نھێنی", login_btn: "چوونەژوور", mhead: "مینیو", tform: "فرۆشتنا نوی", lname: "ناڤێ کڕیاری", lphone: "موبایلا کڕیاری", lwitness: "ناڤێ دیدەڤانی", lwphone: "موبایلا دیدەڤانی", litem: " ئامێر/کاڵا", lbuy: "بهایێ فرۆتنێ", ldown: "پێشەکی", lduration: "ماوێ قیستێ", lmon: "قیست", ltotal: "کۆم", bsave: "تۆمارکرن", s1: "کۆگە", s4: "قازانج", srem: "ماوە", sannual: "تەخمینا ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: " ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "مەخزەن", bclose: "داخستن", search: "لێگەریان ب ناڤ یان ID...", inv_name: "ناڤێ ئامێری (Barcode)", inv_qty: "دانە", inv_add: "زێدەکرن", marchive: "ئەڕشیف", mtrash: "گلێش", mbackup: "سەیفکرنا ئێکسل", mbackup_json: "باکئەپ (JSON)", mpdf: "سەیفکرنا PDF", mrestore: "دووبارە زێدەکرن", mreports: "ڕاپۆرت", mabout: "گەشەپێدەر", mlogout: "چوونەدەر", mpc: "کۆمپیوتەر", mdark: "شەڤ", mlight: "ڕۆژ", dev_role: "پسپۆرێ IT و گەشەپێدەر", dev_msg: "ئەڤ سیستەمە ژ لایێ بژار ڕەشید هاتیە دروستکرن", other: "پشکێن دی", lsaletype: "جۆرێ فرۆشتنێ", opt_inst: "بقیست", opt_cash: "کاش", opt_debt: "قەرز/دەین", opt_other_plan: "پشکێن دی (دەستکاری)", custom_rate: "ڕێژەیا قازانجی %", custom_months: "هژمارا هەیڤان", rep_d: "ڕۆژانە", rep_w: "هەفتیانە", rep_m: "هەیڤانە", rep_y: "ساڵانە", rep_count: "هژمارا وەصلا", rep_total: "کۆما پارەی", click_visit: "بۆ دیتنا پۆرتبۆلیۆی کلیک بکە", rec_title: "وەصلا وەرگرتنێ", rec_cust: "کڕیار", rec_wit: "دیدەڤان", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەیا هەوە", notif_title: "ئاگەهداریێن قستان", notif_msg: "٣ ڕۆژ ماینە بۆ دانا قستێ", inv_cost: "بهایێ کڕینێ", out_of_stock: "ئەڤ کەلوپەلە د مەخزەنی دا نەماینە!", mlabel: "چاپکرنا لەیبلا", invalid_phone: "ژمارەیا موبایلێ یا خەلەتە!", save_error: "کێشەیەک ل دەمێ سەیفکرنێ پەیدابوو! ئینتەرنێتێ کۆنترۆل بکە.", h_title: "دیرۆکا پارەدانێ", mclosing: "داخستنا سندوقێ", lupload: "بارکرنا ناسنامێ", mvault: "سندوق", edit_sale: "دەستکاری", update: "نویکردنەوە", confirm_del: "ئەرێ تو پشتراستی دێ برە د ناف گلێشی دا؟", success_save: "وەێل ب سەرکەفتی هاتە تۆمارکرن", success_pay: "پارە ب سەرکەفتی هاتە وەرگرتن", success_inv: "کەلوپەل ل مەخزەنی هاتە زێدەکرن", success_restore: "داتا ب سەرکەفتی هاتە زێدەکرن", doc_label: "بەلگەیێ کڕیاری (ناسنامە)" },
+        sr: { login_user: "ناوی بەکارهێنەر", login_pass: "وشەی نهێنی", login_btn: "چوونەژوورەوە", mhead: "مینیو", tform: "فرۆشتنی نوێ", lname: "ناوی کڕیار", lphone: "موبایلی کڕیار", lwitness: "ناوی دیدەڤان", lwphone: "موبایلی دیدەڤان", litem: "ئامێر", lbuy: "نرخی فرۆشتنی", ldown: "پێشەکی", lduration: "ماوە", lmon: "قیست", ltotal: "کۆم", bsave: "پاشەکەوت", s1: "کۆگا", s4: "قازانج", srem: "ماوە", sannual: "ساڵانە", lnote: "تێبینی", th1: "کڕیار", th2: "ئامێر", th3: "کۆم", th_down: "پێشەکی", th4: "قیست", th5: "کردار", madd: "کۆگا", bclose: "داخستن", search: "گەڕان بە ناو یان ID...", inv_name: "ناوی کاڵا", inv_qty: "ژمارە", inv_add: "زیادکردن", marchive: "ئەرشیف", mtrash: "تەنەکەی خۆڵ", mbackup: "باکئەپی ئێکسل", mbackup_json: "باکئەپ (JSON)", mpdf: "باکئەپی PDF", mrestore: "گێڕانەوەی داتا", mreports: "ڕاپۆرتەکان", mabout: "دەربارەی سیستم", mlogout: "چوونەدرەوە", mpc: "کۆمپیوتەر", mdark: "شەو", mlight: "ڕۆژ", dev_role: "پسپۆڕی IT و گەشەپێدەر", dev_msg: "ئەم سیستمە لەلایەن بژار ڕەشید دروست کراوە", other: "بەشەکانی تر", lsaletype: "جۆری فرۆشتن", opt_inst: "قست", opt_cash: "نەقد", opt_debt: "قەرز", opt_other_plan: "دەستکاری", custom_rate: "ڕێژەی قازانج %", custom_months: "مانگەکان", rep_d: "ڕۆژانە", rep_w: "هەفتانە", rep_m: "مانگانە", rep_y: "ساڵانە", rep_count: "ژمارەی وەصڵ", rep_total: "کۆیی پارە", click_visit: "بۆ بینینی پۆرتبۆلیۆ کلیک بکە", rec_title: "وەصڵی وەرگرتن", rec_cust: "کڕیار", rec_wit: "شایەت", rec_rem: "ماوە", rec_msg: "سوپاس بۆ متمانەکەتان", notif_title: "ئاگادارکەرەوەی قیستەکان", notif_msg: "٣ ڕۆژ ماوە بۆدانی قیست", inv_cost: "نرخی کڕین", out_of_stock: "ببوورە! ئەم کاڵایە لە کۆگا نەماوە", mlabel: "چاپکردنی لەیبڵ", invalid_phone: "ژمارەی مۆبایلەکە هەڵەیە!", save_error: "کێشەیەک لە پاشەکەوتکردن هەبوو! ئینتەرنێتەکەت کۆنترۆڵ بکە.", h_title: "مێژووی قیستەکان", mclosing: "داخستنی سندوق", lupload: "بارکردنی ناسنامە", mvault: "سندوق", edit_sale: "دەستکاری", update: "نوێکردنەوە", confirm_del: "ئایا دڵنیای دەتەوێت بیخەیتە ناو تەنەکەی خۆڵ؟", success_save: "وەصڵەکە بە سەرکەوتوویی پاشەکەوت کرا", success_pay: "پارەکە بە سەرکەوتوویی وەرگیرا", success_inv: "کاڵاکە بۆ کۆگا زیاد کرا", success_restore: "داتاکان بە سەرکەوتوویی گەڕێنرانەوە", doc_label: "بەڵگەی کڕیار (ناسنامە)" },
+        ar: { login_user: "اسم المستخدم", login_pass: "كلمة المرور", login_btn: "تسجيل الدخول", mhead: "القائمة", tform: "بيع جديد", lname: "اسم الزبون", lphone: "رقم الهاتف", lwitness: "اسم الشاهد", lwphone: "هاتف الشاهد", litem: "المنتج", lbuy: "سعر البيع", ldown: "المقدمة", lduration: "مدة الأقساط", lmon: "القسط الشهري", ltotal: "المجموع", bsave: "حفظ", s1: "المخزن", s4: "الأرباح", srem: "المتبقي", sannual: "التوقع السنوي", lnote: "ملاحظات", th1: "الزبون", th2: "المنتج", th3: "المجموع", th_down: "المقدم", th4: "المدفوع", th5: "إجراء", madd: "المخزن", bclose: "إغلاق", search: "بحث عن طريق الاسم أو الرقم...", inv_name: "اسم المنتج", inv_qty: "الكمية", inv_add: "إضافة", marchive: "الأرشيف", mtrash: "سلة المهملات", mbackup: "تصدير إكسل", mbackup_json: "نسخة JSON", mpdf: "تصدير PDF", mrestore: "استرجاع البيانات", mreports: "التقارير", mabout: "حول المطور", mlogout: "تسجيل الخروج", mpc: "وضع الكمبيوتر", mdark: "ليلي", mlight: "نهاري", dev_role: "خبير IT ومطور برامج", dev_msg: "تم تطوير هذا النظام بواسطة بژار رشيد", other: "أقسام أخرى", lsaletype: "نوع البيع", opt_inst: "أقساط", opt_cash: "نقدي", opt_debt: "دين", opt_other_plan: "تعديل النسبة", custom_rate: "النسبة %", custom_months: "الأشهر", rep_d: "يومي", rep_w: "أسبوعي", rep_m: "شهري", rep_y: "سنوي", rep_count: "عدد الوصلات", rep_total: "إجمالي المبلغ", click_visit: "لمشاهدة معرض الأعمال", rec_title: "وصل استلام", rec_cust: "الزبون", rec_wit: "الشاهد", rec_rem: "الباقي", rec_msg: "شكراً لثقتكم بنا", notif_title: "تنبيهات الأقساط", notif_msg: "بقي ٣ أيام على موعد القسط", inv_cost: "سعر الشراء", out_of_stock: "عذراً! المنتج غير متوفر في المخزن", mlabel: "صانع الليبل", invalid_phone: "رقم الهاتف غير صحيح!", save_error: "فشل الحفظ! تحقق من الإنترنت.", h_title: "سجل المدفوعات", mclosing: "إغلاق الصندوق", lupload: "رفع المستمسكات", mvault: "الصندوق", edit_sale: "تعديل", update: "تحديث", confirm_del: "هل أنت متأكد من النقل لسلة المهملات؟", success_save: "تم حفظ الوصل بنجاح", success_pay: "تم استلام المبلغ بنجاح", success_inv: "تمت إضافة المنتج للمخزن", success_restore: "تم استرجاع البيانات بنجاح", doc_label: "مستمسك الزبون" },
+        en: { login_user: "USERNAME", login_pass: "PASSWORD", login_btn: "LOGIN", mhead: "MENU", tform: "NEW SALE", lname: "CUSTOMER NAME", lphone: "PHONE", lwitness: "WITNESS", lwphone: "WIT PHONE", litem: "ITEM", lbuy: "PRICE", ldown: "DOWN", lduration: "PLAN", lmon: "MONTHLY", ltotal: "TOTAL", bsave: "SAVE", s1: "STOCK", s4: "PROFIT", srem: "REMAIN", sannual: "ANNUAL", lnote: "NOTES", th1: "NAME", th2: "ITEM", th3: "TOTAL", th_down: "DOWN", th4: "PAID", th5: "ACTION", madd: "INVENTORY", bclose: "CLOSE", search: "Search by Name or ID...", inv_name: "Item Name", inv_qty: "Qty", inv_add: "Add", marchive: "Archive", mtrash: "Trash", mbackup: "Excel", mbackup_json: "Backup JSON", mpdf: "PDF", mrestore: "Restore", mreports: "Reports", mabout: "About", mlogout: "Logout", mpc: "PC Mode", mdark: "Dark", mlight: "Light", dev_role: "IT Specialist & Developer", dev_msg: "Developed by Bizhar Rasheed", other: "Other Items", lsaletype: "Sale Type", opt_inst: "Installments", opt_cash: "Cash", opt_debt: "Debt", opt_other_plan: "Other", custom_rate: "Rate %", custom_months: "Months", rep_d: "Daily", rep_w: "Weekly", rep_m: "Monthly", rep_y: "Yearly", rep_count: "Receipts", rep_total: "Total", click_visit: "Portfolio", rec_title: "RECEIPT", rec_cust: "Customer", rec_wit: "Witness", rec_rem: "Remain", rec_msg: "Thank you for your trust", notif_title: "Installment Alerts", notif_msg: "3 days left for payment", inv_cost: "Cost Price", out_of_stock: "Sorry! Item out of stock", mlabel: "Label Maker", invalid_phone: "Invalid phone number!", save_error: "Save failed!", h_title: "Payment Ledger", mclosing: "Daily Closing", lupload: "Upload Document", mvault: "Cash Drawer", edit_sale: "Edit", update: "Update", confirm_del: "Are you sure you want to move this to trash?", success_save: "Sale saved successfully!", success_pay: "Payment received!", success_inv: "Inventory updated!", success_restore: "Data restored successfully!", doc_label: "Customer ID Doc" },
+        tr: { login_user: "KULLANICI ADI", login_pass: "ŞİFRE", login_btn: "GİRİŞ", mhead: "MENÜ", tform: "YENİ SATIŞ", lname: "MÜŞTERİ ADI", lphone: "TELEFON", lwitness: "ŞAHİT", lwphone: "ŞAHİT TEL", litem: "ÜRÜN", lbuy: "SATIŞ FİYATI", ldown: "PEŞİNAT", lduration: "TAKSİT PLANI", lmon: "AYLIK", ltotal: "TOPLAM", bsave: "KAYDET", s1: "STOK", s4: "KAR", srem: "KALAN", sannual: "YILLIK TAHMİN", lnote: "NOTLAR", th1: "AD", th2: "ÜRÜN", th3: "TOPLAM", th_down: "PEŞİN", th4: "ÖDENEN", th5: "İŞLEM", madd: "ENVANTER", bclose: "KAPAT", search: "İsim veya ID ile ara...", inv_name: "Ürün Adı", inv_qty: "Adet", inv_add: "Ekle", marchive: "Arşiv", mtrash: "Çöp Kutusu", mbackup: "Excel Çıktısı", mbackup_json: "JSON Yedek", mpdf: "PDF Çıktısı", mrestore: "Veriyi Geri Yükle", mreports: "Raporlar", mabout: "Geliştirici", mlogout: "Çıkış Yap", mpc: "PC Modu", mdark: "Koyu", mlight: "Açık", dev_role: "BT Uzmanı ve Geliştirici", dev_msg: "Bu sistem Bizhar Rasheed tarafından geliştirildi", other: "Diğer Bölümler", lsaletype: "Satış Türü", opt_inst: "Taksitli", opt_cash: "Nakit", opt_debt: "Borç", opt_other_plan: "Oranı Düzenle", custom_rate: "Oran %", custom_months: "Ay Sayısı", rep_d: "Günlük", rep_w: "Haftalık", rep_m: "Aylık", rep_y: "Yıllık", rep_count: "Fiş Sayısı", rep_total: "Toplam Tutar", click_visit: "Portfolyoyu Gör", rec_title: "MAKBUZ", rec_cust: "Müşteri", rec_wit: "Şahit", rec_rem: "Kalan", rec_msg: "Güveniniz için teşekkürler", notif_title: "Taksit Uyarıları", notif_msg: "Ödeme için 3 gün kaldı", inv_cost: "Maliyet", out_of_stock: "Üzgünüz! Ürün stokta yok", mlabel: "Etiket Oluşturucu", invalid_phone: "Geçersiz telefon numarası!", save_error: "Kaydetme hatası!", h_title: "Ödeme Geçmişi", mclosing: "Günlük Kapanış", lupload: "Belge Yükle", mvault: "Kasa", edit_sale: "Düzenle", update: "Güncelle", confirm_del: "Çöp kutusuna taşımak istediğinize emin misiniz?", success_save: "Satış başarıyla kaydedildi!", success_pay: "Ödeme alındı!", success_inv: "Envanter güncellendi!", success_restore: "Veriler başarıyla yüklendi!", doc_label: "Müşteri Kimlik Belgesi" },
+        fa: { login_user: "نام کاربری", login_pass: "رمز عبور", login_btn: "ورود", mhead: "منو", tform: "فروش جدید", lname: "نام مشتری", lphone: "شماره تماس", lwitness: "نام شاهد", lwphone: "تماس شاهد", litem: "کالا", lbuy: "قیمت فروش", ldown: "پیش‌پرداخت", lduration: "مدت اقساط", lmon: "قسط ماهانه", ltotal: "مجموع", bsave: "ذخیره", s1: "موجودی", s4: "سود", srem: "باقیمانده", sannual: "تخمین سالانه", lnote: "یادداشت", th1: "مشتری", th2: "کالا", th3: "مجموع", th_down: "پیش", th4: "پرداختی", th5: "عملیات", madd: "انبار", bclose: "بستن", search: "جستجو با نام یا شناسه...", inv_name: "نام کالا", inv_qty: "تعداد", inv_add: "افزودن", marchive: "آرشیو", mtrash: "زباله‌دان", mbackup: "خروجی اکسل", mbackup_json: "پشتیبان JSON", mpdf: "خروجی PDF", mrestore: "بازیابی داده‌ها", mreports: "گزارش‌ها", mabout: "درباره توسعه‌دهنده", mlogout: "خروج", mpc: "حالت کامپیوتر", mdark: "تاریک", mlight: "روشن", dev_role: "متخصص IT و توسعه‌دهنده", dev_msg: "این سیستم توسط بژار رشید طراحی شده است", other: "بخش‌های دیگر", lsaletype: "نوع فروش", opt_inst: "اقساطی", opt_cash: "نقدی", opt_debt: "قرض", opt_other_plan: "تغییر درصد", custom_rate: "درصد سود %", custom_months: "تعداد ماه", rep_d: "روزانه", rep_w: "هفتگی", rep_m: "ماهانه", rep_y: "سالانه", rep_count: "تعداد فاکتور", rep_total: "جمع مبالغ", click_visit: "مشاهده نمونه کارها", rec_title: "رسید پرداخت", rec_cust: "مشتری", rec_wit: "شاهد", rec_rem: "مانده", rec_msg: "ممنون از اعتماد شما", notif_title: "هشدار اقساط", notif_msg: "۳ روز تا سررسید قسط", inv_cost: "قیمت خرید", out_of_stock: "متاسفیم! موجودی انبار تمام شده", mlabel: "برچسب‌ساز", invalid_phone: "شماره تماس نامعتبر است!", save_error: "خطا در ذخیره‌سازی!", h_title: "تاریخچه پرداخت", mclosing: "بستن صندوق", lupload: "بارگذاری مدرک", mvault: "صندوق نقد", edit_sale: "ویرایش", update: "بروزرسانی", confirm_del: "آیا از انتقال به زباله‌دان مطمئن هستید؟", success_save: "فروش با موفقیت ثبت شد", success_pay: "مبلغ دریافت شد!", success_inv: "انبار بروزرسانی شد", success_restore: "داده‌ها بازیابی شدند", doc_label: "مدارک مشتری" }
     };
 
-    window.onload = () => { if(localStorage.getItem("bizhar_logged") === "true") document.getElementById('login-overlay').style.display = 'none'; applyLang(); toggleSaleMode(); };
-    function checkLogin() { if(document.getElementById('login-user').value.toUpperCase() === "BIZHAR" && document.getElementById('login-pass').value === SECRET_KEY) { localStorage.setItem("bizhar_logged", "true"); document.getElementById('login-overlay').style.display = 'none'; } else alert("ACCESS DENIED!"); }
-    function logout() { localStorage.removeItem("bizhar_logged"); location.reload(); }
+    window.onload = () => { 
+        if(localStorage.getItem("bizhar_logged") === "true") {
+            currentUserRole = localStorage.getItem("bizhar_role") || "Cashier";
+            document.getElementById('login-overlay').style.display = 'none';
+            applyPermissions();
+        } 
+        applyLang(); 
+        toggleSaleMode(); 
+    };
+    
+    window.onclick = function(event) {
+        let modal = document.getElementById('modal-universal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    function checkLogin() { 
+        let user = document.getElementById('login-user').value.toUpperCase();
+        let pass = document.getElementById('login-pass').value;
+
+        if(user === "BIZHAR" && pass === SECRET_KEY) { 
+            currentUserRole = "Admin";
+            loginSuccess();
+        } else if(user === "CASHIER" && pass === "Cashier") {
+            currentUserRole = "Cashier";
+            loginSuccess();
+        } else {
+            alert("ACCESS DENIED!"); 
+        }
+    }
+
+    function loginSuccess() {
+        localStorage.setItem("bizhar_logged", "true"); 
+        localStorage.setItem("bizhar_role", currentUserRole);
+        document.getElementById('login-overlay').style.display = 'none'; 
+        applyPermissions();
+        render();
+        showToast("Welcome Back!", "success");
+    }
+
+    function applyPermissions() {
+        if(currentUserRole === "Admin") {
+            document.getElementById('admin-only-menu').style.display = 'block';
+            document.querySelectorAll('.admin-feature').forEach(el => el.style.display = 'block');
+        } else {
+            document.getElementById('admin-only-menu').style.display = 'none';
+            document.querySelectorAll('.admin-feature').forEach(el => el.style.display = 'none');
+        }
+    }
+
+    function logout() { 
+        localStorage.removeItem("bizhar_logged"); 
+        localStorage.removeItem("bizhar_role");
+        location.reload(); 
+    }
+
     function checkInvPass() { if(prompt("MASTER KEY:") === SECRET_KEY) { isInventoryOpen = true; showInventory(); } }
 
     db.ref('/').on('value', snap => { const d = snap.val(); if(d){ inv=d.i||[]; sales=d.s||[]; archive=d.a||[]; trash=d.t||[]; reports=d.r||[]; render(); if(isInventoryOpen) showInventory(); checkInstallmentsNotif(); } });
@@ -403,12 +526,20 @@
         .then(() => { if(callback) callback(true); })
         .catch((error) => { 
             const l = translations[document.getElementById('lang-sel').value] || translations.bd;
-            alert(l.save_error || "Database Error!"); 
+            showToast(l.save_error || "Database Error!", "danger"); 
             if(callback) callback(false);
         }); 
     }
 
-    function handleSearch() { render(); if(isInventoryOpen) showInventory(); }
+    function handleSearch() { 
+        render(); 
+        if(isInventoryOpen) showInventory();
+        const modalTitle = document.getElementById('modal-title').innerText;
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd;
+        if(modalTitle === l.marchive) showArchive(true);
+        if(modalTitle === "TRASH") showRecycleBin(true);
+    }
+    
     function togglePrivacy() { privacyHidden = !privacyHidden; render(); }
 
     function toggleDark() { 
@@ -422,12 +553,12 @@
 
     function previewDoc(input) {
         if (input.files && input.files[0]) {
+            currentDocFile = input.files[0];
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = document.getElementById('doc-preview');
                 img.src = e.target.result;
                 img.style.display = 'block';
-                currentDocBase64 = e.target.result;
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -487,13 +618,15 @@
                 rate = rates[m] || 0;
             }
             
-            let remainingBase = b - d;
+            let remainingBase = Math.max(0, b - d);
             let profitAmount = remainingBase * rate;
-            total = b + profitAmount;
+            
+            total = Math.round((b + profitAmount) * 100) / 100;
             mon = Math.round(((total - d) / m) * 100) / 100;
+
         } else if (type === 'Debt') {
             total = b;
-            mon = b - d;
+            mon = Math.max(0, b - d);
             m = 1;
         } else {
             total = b;
@@ -503,10 +636,16 @@
 
         document.getElementById('o-mon').innerText = "$" + (mon > 0 ? mon.toFixed(2) : 0);
         document.getElementById('o-total').innerText = "$" + total.toFixed(2);
-        return { total, mon, b, d, m };
+        return { 
+            total: Number(total.toFixed(2)), 
+            mon: Number(mon.toFixed(2)), 
+            b: Number(b.toFixed(2)), 
+            d: Number(d.toFixed(2)), 
+            m: m 
+        };
     }
 
-    function saveSale() {
+    async function saveSale() {
         let n = document.getElementById('i-name').value;
         let phone = document.getElementById('i-phone').value.trim();
         let wit = document.getElementById('i-witness').value;
@@ -519,11 +658,30 @@
         if(!n || !iId) return;
 
         const phoneRegex = /^[0-9]{10,15}$/;
-        if(!phoneRegex.test(phone)) { alert(l.invalid_phone || "Invalid Phone!"); return; }
-        if(saleType === 'Installments' && !phoneRegex.test(witPhone)) { alert(l.invalid_phone || "Invalid Witness Phone!"); return; }
+        if(!phoneRegex.test(phone)) { showToast(l.invalid_phone || "Invalid Phone!", "danger"); return; }
+        if(saleType === 'Installments' && !phoneRegex.test(witPhone)) { showToast(l.invalid_phone || "Invalid Witness Phone!", "danger"); return; }
 
         let idx = inv.findIndex(x => x.id == iId || x.name == iId);
-        if(idx === -1 || inv[idx].qty <= 0) { alert(l.out_of_stock || "Out of Stock!"); return; }
+        if(idx === -1 || inv[idx].qty <= 0) { showToast(l.out_of_stock || "Out of Stock!", "danger"); return; }
+
+        const saveBtn = document.getElementById('save-sale-btn');
+        saveBtn.disabled = true;
+        saveBtn.innerText = "UPLOADING...";
+
+        let docUrl = "";
+        if (currentDocFile) {
+            try {
+                const storageRef = storage.ref(`documents/${Date.now()}_${currentDocFile.name}`);
+                const snapshot = await storageRef.put(currentDocFile);
+                docUrl = await snapshot.ref.getDownloadURL();
+            } catch (e) {
+                console.error("Upload Error", e);
+                showToast("Image Upload Failed!", "danger");
+                saveBtn.disabled = false;
+                saveBtn.innerText = "SAVE";
+                return;
+            }
+        }
 
         let p = calc();
         let itemFullData = JSON.parse(JSON.stringify(inv[idx])); 
@@ -535,14 +693,14 @@
         const saleData = { 
             id:Date.now(), 
             name:n, phone: phone,
-            customerDoc: currentDocBase64, 
+            customerDoc: docUrl, 
             witness: (saleType === 'Cash' || saleType === 'Debt' ? 'N/A' : wit),
             witnessPhone: (saleType === 'Cash' || saleType === 'Debt' ? 'N/A' : witPhone),
             item: itemFullData.name, itemId: itemFullData.id, itemDetails: itemFullData, 
-            total:p.total.toFixed(2), buy:p.b, cost: itemFullData.cost || 0, 
-            down:p.d, mon:p.mon.toFixed(2), months:p.m, paid:0, 
+            total: p.total, buy: p.b, cost: Number(parseFloat(itemFullData.cost || 0).toFixed(2)), 
+            down: p.d, mon: p.mon, months: p.m, paid:0, 
             date: now.toLocaleString(),
-            lastPaymentDate: Date.now(),
+            lastPaymentDate: now.getTime(),
             timestamp: now.getTime(),
             note: nt, type: saleType,
             paymentsHistory: []
@@ -552,11 +710,15 @@
         else sales.unshift(saleData);
 
         updateDB((success) => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>SAVE</span>`;
             if(success) {
+                showToast(l.success_save, "success");
                 ["i-name", "i-phone", "i-witness", "i-witness-phone", "i-note", "i-buy", "i-down"].forEach(id => document.getElementById(id).value = "");
                 document.getElementById('doc-preview').style.display = 'none';
-                currentDocBase64 = "";
+                currentDocFile = null;
                 calc();
+                applyLang();
             } else {
                 inv[idx].qty = oldQty;
                 if(saleType === 'Cash') archive.shift();
@@ -565,8 +727,65 @@
         }); 
     }
 
-    function pay(id) {
+    function editSale(id) {
         if(prompt("KEY:") !== SECRET_KEY) return;
+        const s = sales.find(x => x.id === id) || archive.find(x => x.id === id);
+        if(!s) return;
+        
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd;
+        document.getElementById('modal-title').innerText = l.edit_sale || "Edit Sale";
+        
+        document.getElementById('modal-content').innerHTML = `
+            <div class="card">
+                <label style="font-weight:700;">${l.lname}</label>
+                <input type="text" id="edit-name" value="${s.name}">
+                
+                <label style="font-weight:700; margin-top:15px; display:block;">${l.lphone}</label>
+                <input type="tel" id="edit-phone" value="${s.phone}">
+                
+                ${s.type === 'Installments' ? `
+                    <label style="font-weight:700; margin-top:15px; display:block;">${l.lwitness}</label>
+                    <input type="text" id="edit-witness" value="${s.witness}">
+                    <label style="font-weight:700; margin-top:15px; display:block;">${l.lwphone}</label>
+                    <input type="tel" id="edit-witphone" value="${s.witnessPhone}">
+                ` : ''}
+                
+                <label style="font-weight:700; margin-top:15px; display:block;">${l.lnote}</label>
+                <textarea id="edit-note" rows="2">${s.note || ""}</textarea>
+                
+                <button class="main-btn" onclick="updateSale(${s.id})"><i class="fa-solid fa-check-double"></i> ${l.update || "Update"}</button>
+            </div>
+        `;
+        document.getElementById('modal-universal').style.display = 'flex';
+    }
+
+    function updateSale(id) {
+        let sIdx = sales.findIndex(x => x.id === id);
+        let aIdx = archive.findIndex(x => x.id === id);
+        let target = sIdx !== -1 ? sales[sIdx] : archive[aIdx];
+        
+        if(!target) return;
+
+        target.name = document.getElementById('edit-name').value;
+        target.phone = document.getElementById('edit-phone').value;
+        target.note = document.getElementById('edit-note').value;
+        
+        if(target.type === 'Installments') {
+            target.witness = document.getElementById('edit-witness').value;
+            target.witnessPhone = document.getElementById('edit-witphone').value;
+        }
+
+        updateDB((success) => {
+            if(success) {
+                showToast("Updated!", "success");
+                closeModal();
+                render();
+            }
+        });
+    }
+
+    function pay(id) {
+        if(prompt("KEY:") !== SECRET_KEY && currentUserRole !== "Cashier") return;
         let idx = sales.findIndex(x => x.id === id);
         if(idx !== -1) {
             let count = 1;
@@ -581,7 +800,7 @@
                 let available = sales[idx].months - sales[idx].paid;
                 if(count > available) count = available;
                 if(count <= 0) return;
-                amountToPay = sales[idx].mon;
+                amountToPay = parseFloat(sales[idx].mon);
             }
 
             let oldSales = JSON.parse(JSON.stringify(sales));
@@ -596,18 +815,30 @@
             let tempReports = [];
             if(sales[idx].type === 'Debt') {
                 let currentDebt = parseFloat(sales[idx].mon);
-                sales[idx].mon = (currentDebt - amountToPay).toFixed(2);
-                sales[idx].paymentsHistory.push({ installmentNo: 'Debt Payment', amount: amountToPay.toFixed(2), date: payTime, collector: 'System Admin' });
-                const rep = { ...sales[idx], payDate: payTime, mon: amountToPay.toFixed(2), currentPayment: 'Debt', remAmt: sales[idx].mon, remCount: 0, timestamp: Date.now() };
+                let newDebt = Math.max(0, currentDebt - amountToPay);
+                sales[idx].mon = Number(newDebt.toFixed(2));
+                sales[idx].paymentsHistory.push({ installmentNo: 'Debt Payment', amount: amountToPay.toFixed(2), date: payTime, collector: currentUserRole });
+                const rep = { ...sales[idx], payDate: payTime, mon: Number(amountToPay.toFixed(2)), currentPayment: 'Debt', remAmt: sales[idx].mon, remCount: 0, timestamp: Date.now() };
                 reports.unshift(rep);
                 tempReports.push(rep);
-                if(parseFloat(sales[idx].mon) <= 0) { archive.unshift(sales[idx]); sales.splice(idx, 1); }
+                if(sales[idx].mon <= 0) { archive.unshift(sales[idx]); sales.splice(idx, 1); }
             } else {
                 for(let i=0; i<count; i++) {
                     sales[idx].paid++;
-                    sales[idx].paymentsHistory.push({ installmentNo: sales[idx].paid, amount: sales[idx].mon, date: payTime, collector: 'System Admin' });
-                    const calculatedRemain = Math.max(0, (parseFloat(sales[idx].total) - parseFloat(sales[idx].down) - (parseFloat(sales[idx].mon) * sales[idx].paid))).toFixed(2);
-                    const rep = { ...sales[idx], payDate: payTime, currentPayment: sales[idx].paid, remAmt: calculatedRemain, remCount: (sales[idx].months - sales[idx].paid), timestamp: Date.now() };
+                    sales[idx].paymentsHistory.push({ installmentNo: sales[idx].paid, amount: amountToPay.toFixed(2), date: payTime, collector: currentUserRole });
+                    
+                    const paidAmountTotal = (parseFloat(sales[idx].mon) * sales[idx].paid);
+                    const calculatedRemain = Math.max(0, (parseFloat(sales[idx].total) - parseFloat(sales[idx].down) - paidAmountTotal));
+                    
+                    const rep = { 
+                        ...sales[idx], 
+                        payDate: payTime, 
+                        mon: Number(amountToPay.toFixed(2)),
+                        currentPayment: sales[idx].paid, 
+                        remAmt: Number(calculatedRemain.toFixed(2)), 
+                        remCount: (sales[idx].months - sales[idx].paid), 
+                        timestamp: Date.now() 
+                    };
                     reports.unshift(rep);
                     tempReports.push(rep);
                 }
@@ -617,7 +848,9 @@
             if(idx !== -1 && sales[idx]) sales[idx].lastPaymentDate = now.getTime();
 
             updateDB((success) => {
+                const l = translations[document.getElementById('lang-sel').value] || translations.bd;
                 if(success) {
+                    showToast(l.success_pay, "success");
                     showReceiptPreview(tempReports[tempReports.length - 1]);
                 } else { 
                     sales = oldSales; archive = oldArchive; reports = oldReports; render(); 
@@ -709,8 +942,7 @@
     }
 
     function checkInstallmentsNotif() {
-        const now = Date.now();
-        const dueMillis = 27 * 24 * 60 * 60 * 1000;
+        const now = Date.now(), dueMillis = 27 * 24 * 60 * 60 * 1000;
         let count = 0;
         sales.forEach(s => { if(s.type !== 'Cash' && (now - s.lastPaymentDate) >= dueMillis) count++; });
         const bell = document.getElementById('notif-bell');
@@ -734,10 +966,8 @@
     }
 
     function printThermal(data, size = '80mm', orient = 'portrait') {
-        const area = document.getElementById('print-area');
-        const lang = document.getElementById('lang-sel').value;
-        const l = translations[lang] || translations.bd;
-        const isRtl = !['en','tr'].includes(lang);
+        const area = document.getElementById('print-area'), lang = document.getElementById('lang-sel').value;
+        const l = translations[lang] || translations.bd, isRtl = !['en','tr'].includes(lang);
         let detailsHtml = "";
         const d = data.itemDetails;
         if(d.type === "Mobile") detailsHtml = `${d.model} | ${d.storage}GB | ${d.color}`;
@@ -768,8 +998,7 @@
     }
 
     function showInventory() {
-        const l = translations[document.getElementById('lang-sel').value] || translations.bd;
-        const q = document.getElementById('search-input').value.toLowerCase();
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd, q = document.getElementById('search-input').value.toLowerCase();
         document.getElementById('modal-title').innerText = l.madd;
         let filteredInv = inv.filter(x => x.name.toLowerCase().includes(q));
 
@@ -796,7 +1025,7 @@
             <button class="main-btn" onclick="addInv()"><i class="fa-solid fa-plus"></i> ${l.inv_add}</button>
         </div>
         <div class="table-wrap"><table><thead><tr><th>${l.inv_name}</th><th>Cost</th><th>Qty</th><th>X</th></tr></thead>
-        <tbody>${filteredInv.map((x)=>`<tr><td><b>${x.name}</b></td><td>$${x.cost||0}</td><td>${x.qty}</td><td><button onclick="delInv(${x.id})" style="color:var(--danger); background:none; border:none;"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')}</tbody></table></div>`;
+        <tbody>${filteredInv.map((x)=>`<tr><td><b>${x.name}</b></td><td>$${parseFloat(x.cost||0).toFixed(2)}</td><td>${x.qty}</td><td><button onclick="delInv(${x.id})" style="color:var(--danger); background:none; border:none;"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('')}</tbody></table></div>`;
         document.getElementById('modal-universal').style.display = 'flex';
     }
 
@@ -818,9 +1047,7 @@
     }
 
     function previewLabel() {
-        const id = document.getElementById('label-item-sel').value;
-        const item = inv.find(x => x.id == id);
-        const area = document.getElementById('label-preview-area');
+        const id = document.getElementById('label-item-sel').value, item = inv.find(x => x.id == id), area = document.getElementById('label-preview-area');
         if(!item) { area.innerHTML = ""; return; }
         area.innerHTML = `<div id="label-temp" class="label-print">
             <b style="font-size:12px; display:block;">${item.name}</b>
@@ -830,11 +1057,7 @@
         new QRCode(document.getElementById("label-qr"), { text: item.name, width: 50, height: 50 });
     }
 
-    function printLabel() {
-        const area = document.getElementById('print-area');
-        area.innerHTML = document.getElementById('label-preview-area').innerHTML;
-        setTimeout(() => { window.print(); }, 500);
-    }
+    function printLabel() { const area = document.getElementById('print-area'); area.innerHTML = document.getElementById('label-preview-area').innerHTML; setTimeout(() => { window.print(); }, 500); }
 
     function toggleInvFields() {
         const type = document.getElementById('inv-type').value;
@@ -844,10 +1067,9 @@
     }
 
     function addInv() { 
-        let type = document.getElementById('inv-type').value, n = document.getElementById('add-n').value, q = parseInt(document.getElementById('add-q').value)||0; 
-        let cost = parseFloat(document.getElementById('add-cost').value)||0;
+        let type = document.getElementById('inv-type').value, n = document.getElementById('add-n').value, q = parseInt(document.getElementById('add-q').value)||0, cost = parseFloat(document.getElementById('add-cost').value)||0;
         if(!n || q <= 0) return;
-        let deviceData = { id: Date.now(), name: n, qty: q, cost: cost, type: type };
+        let deviceData = { id: Date.now(), name: n, qty: q, cost: Number(cost.toFixed(2)), type: type };
         if(type === 'Mobile') {
             deviceData.model = document.getElementById('m-model').value; deviceData.color = document.getElementById('m-color').value;
             deviceData.storage = document.getElementById('m-storage').value; deviceData.ram = document.getElementById('m-ram').value;
@@ -855,32 +1077,22 @@
             deviceData.cpu = document.getElementById('p-cpu').value; deviceData.ram = document.getElementById('p-ram').value;
             deviceData.storage = document.getElementById('p-ssd').value;
         } else { deviceData.otherInfo = document.getElementById('o-info').value; }
-        inv.push(deviceData); updateDB(); showInventory();
+        inv.push(deviceData); 
+        updateDB(() => {
+            const l = translations[document.getElementById('lang-sel').value] || translations.bd;
+            showToast(l.success_inv, "success");
+            showInventory();
+        });
     }
 
     function startGenericScanner(targetInputId) {
         if (activeScanner) { activeScanner.clear().catch(() => {}); activeScanner = null; }
-        const content = document.getElementById('modal-content');
-        const oldHtml = content.innerHTML;
-        content.innerHTML = `
-            <div id="reader-box"></div>
-            <button class="main-btn" id="close-scanner-btn" style="background:#475569; margin-top:15px;">Back</button>
-        `;
-        const config = { 
-            fps: 30, 
-            qrbox: (viewWidth, viewHeight) => {
-                let size = Math.min(viewWidth, viewHeight) * 0.7;
-                return { width: size, height: size };
-            },
-            aspectRatio: 1.0,
-            videoConstraints: { facingMode: "environment", focusMode: "continuous" }
-        };
+        const content = document.getElementById('modal-content'), oldHtml = content.innerHTML;
+        content.innerHTML = `<div id="reader-box"></div><button class="main-btn" id="close-scanner-btn" style="background:#475569; margin-top:15px;">Back</button>`;
+        const config = { fps: 30, qrbox: (vw, vh) => { let s = Math.min(vw, vh) * 0.7; return { width: s, height: s }; }, aspectRatio: 1.0, videoConstraints: { facingMode: "environment", focusMode: "continuous" } };
         activeScanner = new Html5QrcodeScanner("reader-box", config, false);
-        activeScanner.render((text) => {
-            document.getElementById(targetInputId).value = text;
-            if(targetInputId === 'i-item') updateDetailsHint();
-            stopAndResetScanner(targetInputId, oldHtml);
-        });
+        activeScanner.render((text) => { document.getElementById(targetInputId).value = text; if(targetInputId === 'i-item') updateDetailsHint(); stopAndResetScanner(targetInputId, oldHtml); });
+        document.getElementById('close-scanner-btn').onclick = () => stopAndResetScanner(targetInputId, oldHtml);
     }
 
     function stopAndResetScanner(id, oldHtml) {
@@ -889,16 +1101,10 @@
         } else { if(id === 'add-n') showInventory(); else closeModal(); }
     }
 
-    function scanForSale() {
-        document.getElementById('modal-title').innerText = "SCAN";
-        document.getElementById('modal-universal').style.display = 'flex';
-        startGenericScanner('i-item');
-    }
+    function scanForSale() { document.getElementById('modal-title').innerText = "SCAN"; document.getElementById('modal-universal').style.display = 'flex'; startGenericScanner('i-item'); }
 
     function updateDetailsHint() {
-        const iVal = document.getElementById('i-item').value;
-        const item = inv.find(x => x.id == iVal || x.name == iVal);
-        const hint = document.getElementById('item-details-hint');
+        const iVal = document.getElementById('i-item').value, item = inv.find(x => x.id == iVal || x.name == iVal), hint = document.getElementById('item-details-hint');
         if(item) {
             document.getElementById('i-item').value = item.id;
             if(item.type === 'Mobile') hint.innerText = `${item.model} | ${item.storage}GB | Cost: $${item.cost}`;
@@ -908,8 +1114,7 @@
     }
 
     function applyLang() {
-        const l = translations[document.getElementById('lang-sel').value] || translations.bd; 
-        const isLtr = ['en','tr'].includes(document.getElementById('lang-sel').value);
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd, isLtr = ['en','tr'].includes(document.getElementById('lang-sel').value);
         document.body.dir = isLtr ? "ltr" : "rtl";
         
         document.getElementById('m-header').innerText = l.mhead; 
@@ -954,6 +1159,7 @@
         document.getElementById('l-mon').innerText = l.lmon;
         document.getElementById('b-save').innerText = l.bsave; 
         document.getElementById('l-upload-text').innerText = l.lupload || "Upload Doc";
+        document.getElementById('l-upload-label').innerText = l.doc_label || "Customer Document";
 
         document.getElementById('s1').innerText = l.s1; 
         document.getElementById('s4').innerHTML = `${l.s4} <i class="fa-solid fa-eye privacy-toggle" onclick="togglePrivacy()"></i>`;
@@ -979,34 +1185,25 @@
         let pro = 0, remTotal = 0, q = document.getElementById('search-input').value.toLowerCase();
         
         const processSaleProfit = (s) => {
-            let totalVal = parseFloat(s.total) || 0;
-            let costVal = parseFloat(s.cost) || 0;
-            let downVal = parseFloat(s.down) || 0;
-            let monVal = parseFloat(s.mon) || 0;
-            let paidCount = parseInt(s.paid) || 0;
-            let monthsVal = parseInt(s.months) || 1;
-            
+            let totalVal = parseFloat(s.total) || 0, costVal = parseFloat(s.cost) || 0, downVal = parseFloat(s.down) || 0, monVal = parseFloat(s.mon) || 0, paidCount = parseInt(s.paid) || 0, monthsVal = parseInt(s.months) || 1;
             if (s.type === 'Debt') {
-                pro += (totalVal - costVal) * (downVal / totalVal); 
-                remTotal += parseFloat(s.mon);
+                let saleProfit = totalVal - costVal, currentCashIn = downVal, currentProfitShare = totalVal > 0 ? (currentCashIn / totalVal) * saleProfit : 0;
+                pro += currentProfitShare; remTotal += parseFloat(s.mon);
             } else if (totalVal > 0) {
-                let saleProfit = totalVal - costVal;
-                let currentCashIn = downVal + (monVal * paidCount);
-                let currentProfitShare = (currentCashIn / totalVal) * saleProfit;
-                pro += currentProfitShare;
-                remTotal += (monVal * (monthsVal - paidCount));
+                let saleProfit = totalVal - costVal, currentCashIn = downVal + (monVal * paidCount), currentProfitShare = (currentCashIn / totalVal) * saleProfit;
+                pro += currentProfitShare; remTotal += (monVal * (monthsVal - paidCount));
             }
         };
         sales.forEach(processSaleProfit);
         archive.forEach(s => { pro += (parseFloat(s.total) - parseFloat(s.cost || 0)); });
 
-        document.getElementById('v4').innerText = privacyHidden ? "****" : "$" + pro.toFixed(0);
-        document.getElementById('v-annual').innerText = privacyHidden ? "****" : "$" + (pro * 1.6).toFixed(0);
-        document.getElementById('v-rem').innerText = "$" + remTotal.toFixed(0);
+        document.getElementById('v4').innerText = privacyHidden ? "****" : "$" + Number(pro.toFixed(0));
+        document.getElementById('v-annual').innerText = privacyHidden ? "****" : "$" + Number((pro * 1.6).toFixed(0));
+        document.getElementById('v-rem').innerText = "$" + Number(remTotal.toFixed(0));
         
-        let sel = document.getElementById('i-item'); let curr = sel.value;
+        let sel = document.getElementById('i-item'), curr = sel.value;
         sel.innerHTML = '<option value="">--- ITEM ---</option>';
-        inv.forEach(x => { if(x.qty>0) sel.innerHTML += `<option value="${x.id}">${x.name} ($${x.cost})</option>`; });
+        inv.forEach(x => { if(x.qty>0) sel.innerHTML += `<option value="${x.id}">${x.name}</option>`; });
         sel.value = curr;
         
         let list = document.getElementById('sales-list'); list.innerHTML = '';
@@ -1020,33 +1217,31 @@
                 <td>
                     <button onclick="pay(${s.id})" class="btn-sm" style="background:var(--success);"><i class="fa-solid fa-receipt"></i></button>
                     <button onclick="showLedger(${s.id})" class="btn-sm" style="background:var(--primary);"><i class="fa-solid fa-clock-rotate-left"></i></button>
-                    <button onclick="softDelete(${s.id})" class="btn-sm" style="background:var(--danger);"><i class="fa-solid fa-trash-can"></i></button>
+                    ${currentUserRole === "Admin" ? `
+                        <button onclick="editSale(${s.id})" class="btn-sm" style="background:#f59e0b;"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="softDelete(${s.id})" class="btn-sm" style="background:var(--danger);"><i class="fa-solid fa-trash-can"></i></button>
+                    ` : ''}
                 </td>
             </tr>`;
         });
     }
 
-    function exportPDF() {
-        const element = document.getElementById('main-table');
-        const opt = { margin: 0.5, filename: 'Sales.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' } };
-        html2pdf().set(opt).from(element).save();
+    function exportPDF() { 
+        const element = document.getElementById('main-table'), opt = { margin: 0.5, filename: 'Sales.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' } }; 
+        html2pdf().set(opt).from(element).save(); 
+        showToast("PDF Exported!", "success");
     }
 
     function showReports(type = 'daily') {
         const l = translations[document.getElementById('lang-sel').value] || translations.bd;
         document.getElementById('modal-title').innerText = l.mreports;
         if(document.getElementById('menu-overlay').classList.contains('show')) toggleMenu();
-        
-        const now = new Date();
-        let filtered = [];
-        
+        const now = new Date(); let filtered = [];
         if(type === 'daily') filtered = reports.filter(r => new Date(r.timestamp).toDateString() === now.toDateString());
         else if(type === 'weekly') { const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); filtered = reports.filter(r => new Date(r.timestamp) >= weekAgo); }
         else if(type === 'monthly') filtered = reports.filter(r => new Date(r.timestamp).getMonth() === now.getMonth() && new Date(r.timestamp).getFullYear() === now.getFullYear());
         else if(type === 'yearly') filtered = reports.filter(r => new Date(r.timestamp).getFullYear() === now.getFullYear());
-        
         const totalAmt = filtered.reduce((acc, curr) => acc + parseFloat(curr.mon), 0);
-        
         document.getElementById('modal-content').innerHTML = `
         <div class="report-tabs">
             <button class="tab-btn ${type==='daily'?'active':''}" onclick="showReports('daily')">${l.rep_d}</button>
@@ -1054,44 +1249,20 @@
             <button class="tab-btn ${type==='monthly'?'active':''}" onclick="showReports('monthly')">${l.rep_m}</button>
             <button class="tab-btn ${type==='yearly'?'active':''}" onclick="showReports('yearly')">${l.rep_y}</button>
         </div>
-        <div class="rep-sum-box">
-            <div class="rep-stat"><small>${l.rep_count}</small><h3>${filtered.length}</h3></div>
-            <div class="rep-stat"><small>${l.rep_total}</small><h3>$${totalAmt.toFixed(2)}</h3></div>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead><tr><th>Customer</th><th>Amount</th><th>Date</th></tr></thead>
-                <tbody>${filtered.map(x=>`<tr><td>${x.name}</td><td>$${x.mon}</td><td style="font-size:10px;">${new Date(x.timestamp).toLocaleDateString()}</td></tr>`).join('')}</tbody>
-            </table>
-        </div>`;
+        <div class="rep-sum-box"><div class="rep-stat"><small>${l.rep_count}</small><h3>${filtered.length}</h3></div><div class="rep-stat"><small>${l.rep_total}</small><h3>$${totalAmt.toFixed(2)}</h3></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Customer</th><th>Amount</th><th>Date</th></tr></thead><tbody>${filtered.map(x=>`<tr><td>${x.name}</td><td>$${parseFloat(x.mon).toFixed(2)}</td><td style="font-size:10px;">${new Date(x.timestamp).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
         document.getElementById('modal-universal').style.display = 'flex';
     }
 
     function showDailyClosing() {
-        const l = translations[document.getElementById('lang-sel').value] || translations.bd;
-        const nowStr = new Date().toDateString();
-        const nowFormatted = new Date().toLocaleString();
-        
-        let dailyDownPayments = 0;
-        let downPayCount = 0;
-        [...sales, ...archive].forEach(s => {
-            if (new Date(s.timestamp).toDateString() === nowStr) {
-                dailyDownPayments += parseFloat(s.down);
-                downPayCount++;
-            }
-        });
-
-        const dailyInstallments = reports.filter(r => new Date(r.timestamp).toDateString() === nowStr);
-        const installmentTotal = dailyInstallments.reduce((acc, curr) => acc + parseFloat(curr.mon), 0);
-        const closingTotal = dailyDownPayments + installmentTotal;
-
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd, nowStr = new Date().toDateString(), nowFormatted = new Date().toLocaleString();
+        let dailyDownPayments = 0, downPayCount = 0;
+        [...sales, ...archive].forEach(s => { if (new Date(s.timestamp).toDateString() === nowStr) { dailyDownPayments += parseFloat(s.down); downPayCount++; } });
+        const dailyInstallments = reports.filter(r => new Date(r.timestamp).toDateString() === nowStr), installmentTotal = dailyInstallments.reduce((acc, curr) => acc + parseFloat(curr.mon), 0), closingTotal = dailyDownPayments + installmentTotal;
         document.getElementById('modal-title').innerText = l.mclosing;
         document.getElementById('modal-content').innerHTML = `
             <div class="card receipt-preview" id="closing-preview" style="background:var(--bg); border:2px dashed var(--neon-blue);">
-                <div style="text-align:center;">
-                    <h3 style="color:var(--neon-blue)">DAILY CLOSING</h3>
-                    <p>${nowFormatted}</p>
-                </div>
+                <div style="text-align:center;"><h3 style="color:var(--neon-blue)">DAILY CLOSING</h3><p>${nowFormatted}</p></div>
                 <hr style="margin:15px 0; border:0.5px dashed #000;">
                 <div class="thermal-row"><span>New Sales (Downpay):</span><b>$${dailyDownPayments.toFixed(2)} (${downPayCount})</b></div>
                 <div class="thermal-row"><span>Installments Recv:</span><b>$${installmentTotal.toFixed(2)} (${dailyInstallments.length})</b></div>
@@ -1100,16 +1271,12 @@
             </div>
             <button class="main-btn" onclick="printClosing()"><i class="fa-solid fa-print"></i> PRINT CLOSING</button>
         `;
-        document.getElementById('modal-universal').style.display = 'flex';
-        toggleMenu();
+        document.getElementById('modal-universal').style.display = 'flex'; toggleMenu();
     }
 
     function showCashDrawer() {
         const l = translations[document.getElementById('lang-sel').value] || translations.bd;
-        let totalDown = [...sales, ...archive].reduce((acc, s) => acc + parseFloat(s.down), 0);
-        let totalReceived = reports.reduce((acc, r) => acc + parseFloat(r.mon), 0);
-        let cashInDrawer = totalDown + totalReceived;
-
+        let totalDown = [...sales, ...archive].reduce((acc, s) => acc + parseFloat(s.down), 0), totalReceived = reports.reduce((acc, r) => acc + parseFloat(r.mon), 0), cashInDrawer = totalDown + totalReceived;
         document.getElementById('modal-title').innerText = l.mvault || "Cash Drawer";
         document.getElementById('modal-content').innerHTML = `
             <div class="card" style="text-align:center; padding:30px; border:2px solid var(--success);">
@@ -1123,66 +1290,132 @@
                 </div>
             </div>
         `;
-        document.getElementById('modal-universal').style.display = 'flex';
-        toggleMenu();
+        document.getElementById('modal-universal').style.display = 'flex'; toggleMenu();
     }
 
-    function printClosing() {
-        const content = document.getElementById('closing-preview').innerHTML;
-        const area = document.getElementById('print-area');
-        area.innerHTML = `<div class="print-80mm" style="padding:10px;">${content}</div>`;
-        setTimeout(() => { window.print(); }, 500);
-    }
-
+    function printClosing() { const content = document.getElementById('closing-preview').innerHTML, area = document.getElementById('print-area'); area.innerHTML = `<div class="print-80mm" style="padding:10px;">${content}</div>`; setTimeout(() => { window.print(); }, 500); }
     function toggleLayout() { document.getElementById('app-container').classList.toggle('pc-mode-active'); toggleMenu(); }
     function toggleMenu() { document.getElementById('menu-overlay').classList.toggle('show'); }
-    function delInv(id) { if(confirm("DELETE?")){inv = inv.filter(x => x.id !== id); updateDB(); showInventory();} }
-
-    function softDelete(id) { 
-        if(confirm("MOVE TO TRASH?") && prompt("KEY:")===SECRET_KEY){ 
-            let idx = sales.findIndex(x => x.id === id);
-            if(idx !== -1) {
-                let saleItem = sales[idx];
-                let invIdx = inv.findIndex(x => x.id == saleItem.itemId);
-                let oldSales = [...sales], oldTrash = [...trash], oldQty = (invIdx !== -1) ? inv[invIdx].qty : null;
-                if(invIdx !== -1) inv[invIdx].qty++; 
-                trash.unshift(saleItem); sales.splice(idx, 1); 
-                updateDB((success) => { if(!success) { sales = oldSales; trash = oldTrash; if(invIdx !== -1) inv[invIdx].qty = oldQty; render(); } }); 
-            }
+    function delInv(id) { 
+        if(confirm("DELETE?")){
+            inv = inv.filter(x => x.id !== id); 
+            updateDB(() => {
+                showToast("Item Deleted!", "danger");
+                showInventory();
+            });
         } 
     }
 
-    function showArchive() {
-        const q = document.getElementById('search-input').value.toLowerCase();
-        let filtered = archive.filter(x => x.name.toLowerCase().includes(q) || x.item.toLowerCase().includes(q));
-        document.getElementById('modal-title').innerText="COMPLETED"; 
-        document.getElementById('modal-content').innerHTML=`<div class="table-wrap"><table>
-            <thead><tr><th>NAME</th><th>ITEM</th><th>TOTAL</th><th>LEDGER</th></tr></thead>
-            <tbody>${filtered.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.item}</td><td>$${x.total}</td><td><button onclick="showLedger(${x.id})" class="btn-sm" style="background:var(--primary);"><i class="fa-solid fa-clock-rotate-left"></i></button></td></tr>`).join('')}</tbody></table></div>`; 
-        document.getElementById('modal-universal').style.display='flex'; toggleMenu(); 
+    function softDelete(id) { 
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd;
+        document.getElementById('modal-title').innerText = "CONFIRM";
+        document.getElementById('modal-content').innerHTML = `
+            <div class="confirm-box">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <p style="font-weight:900; font-size:1.1rem;">${l.confirm_del}</p>
+                <div class="confirm-actions">
+                    <button class="confirm-btn btn-no" onclick="closeModal()">NO</button>
+                    <button class="confirm-btn btn-yes" onclick="executeSoftDelete(${id})">YES, TRASH IT</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('modal-universal').style.display = 'flex';
     }
 
-    function showRecycleBin() { 
-        document.getElementById('modal-title').innerText="TRASH"; 
-        document.getElementById('modal-content').innerHTML=`<div class="table-wrap"><table><tbody>${trash.map((x,idx)=>`<tr><td>${x.name}</td><td><button onclick="restore(${idx})" class="main-btn">RESTORE</button></td></tr>`).join('')}</tbody></table></div>`; 
-        document.getElementById('modal-universal').style.display='flex'; toggleMenu(); 
+    function executeSoftDelete(id) {
+        if(prompt("MASTER KEY:") === SECRET_KEY) { 
+            let idx = sales.findIndex(x => x.id === id);
+            if(idx !== -1) {
+                let saleItem = sales[idx], invIdx = inv.findIndex(x => x.id == saleItem.itemId), oldSales = [...sales], oldTrash = [...trash], oldQty = (invIdx !== -1) ? inv[invIdx].qty : null;
+                if(invIdx !== -1) inv[invIdx].qty++; 
+                trash.unshift(saleItem); sales.splice(idx, 1); 
+                updateDB((success) => { 
+                    if(success) showToast("Moved to Trash", "danger");
+                    if(!success) { sales = oldSales; trash = oldTrash; if(invIdx !== -1) inv[invIdx].qty = oldQty; render(); }
+                    closeModal();
+                }); 
+            }
+        } else { alert("ACCESS DENIED!"); }
+    }
+
+    function showArchive(isRefresh = false) {
+        const q = document.getElementById('search-input').value.toLowerCase();
+        const l = translations[document.getElementById('lang-sel').value] || translations.bd;
+        let filtered = archive.filter(x => x.name.toLowerCase().includes(q) || x.item.toLowerCase().includes(q) || x.id.toString().includes(q));
+        document.getElementById('modal-title').innerText = l.marchive; 
+        document.getElementById('modal-content').innerHTML = `<div class="table-wrap"><table>
+            <thead><tr><th>NAME</th><th>ITEM</th><th>TOTAL</th><th>ACTION</th></tr></thead>
+            <tbody>${filtered.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.item}</td><td>$${parseFloat(x.total).toFixed(2)}</td><td>
+            <button onclick="showLedger(${x.id})" class="btn-sm" style="background:var(--primary);"><i class="fa-solid fa-clock-rotate-left"></i></button>
+            ${currentUserRole === "Admin" ? `<button onclick="editSale(${x.id})" class="btn-sm" style="background:#f59e0b;"><i class="fa-solid fa-pen-to-square"></i></button>` : ''}
+            </td></tr>`).join('')}</tbody></table></div>`; 
+        document.getElementById('modal-universal').style.display = 'flex'; 
+        if(!isRefresh) toggleMenu(); 
+    }
+
+    function showRecycleBin(isRefresh = false) { 
+        const q = document.getElementById('search-input').value.toLowerCase();
+        let filtered = trash.filter(x => x.name.toLowerCase().includes(q) || x.item.toLowerCase().includes(q) || x.id.toString().includes(q));
+        document.getElementById('modal-title').innerText = "TRASH"; 
+        document.getElementById('modal-content').innerHTML = `<div class="table-wrap"><table>
+            <thead><tr><th>NAME</th><th>ITEM</th><th>ACTION</th></tr></thead>
+            <tbody>${filtered.map((x,idx)=>`<tr><td><b>${x.name}</b></td><td>${x.item}</td><td><button onclick="restore(${trash.indexOf(x)})" class="main-btn" style="margin-top:0; padding:8px;">RESTORE</button></td></tr>`).join('')}</tbody></table></div>`; 
+        document.getElementById('modal-universal').style.display = 'flex'; 
+        if(!isRefresh) toggleMenu(); 
     }
     
     function restore(idx) { 
-        let restoredSale = trash[idx];
-        let invIdx = inv.findIndex(x => x.id == restoredSale.itemId);
+        let restoredSale = trash[idx], invIdx = inv.findIndex(x => x.id == restoredSale.itemId);
         if(invIdx !== -1) {
             let oldTrash = [...trash], oldSales = [...sales], oldQty = inv[invIdx].qty;
             inv[invIdx].qty--; sales.unshift(restoredSale); trash.splice(idx, 1); 
-            updateDB((success) => { if(success) closeModal(); else { trash = oldTrash; sales = oldSales; inv[invIdx].qty = oldQty; } }); 
+            updateDB((success) => { 
+                if(success) { showToast("Restored!", "success"); closeModal(); }
+                else { trash = oldTrash; sales = oldSales; inv[invIdx].qty = oldQty; } 
+            }); 
         } else alert("Item not found in inventory!");
     }
 
-    function closeModal() { isInventoryOpen = false; if(activeScanner) { activeScanner.clear().then(() => { activeScanner = null; document.getElementById('modal-universal').style.display='none'; }).catch(() => { activeScanner = null; document.getElementById('modal-universal').style.display='none'; }); } else document.getElementById('modal-universal').style.display='none'; }
-    function exportToExcel() { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sales), "Sales"); XLSX.writeFile(wb, "POS_Backup.xlsx"); }
-    function exportJSON() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({i:inv, s:sales, a:archive, t:trash, r:reports})); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", "POS_Backup_Full.json"); dlAnchorElem.click(); }
+    function closeModal() { 
+        isInventoryOpen = false; 
+        if(activeScanner) { activeScanner.clear().then(() => { activeScanner = null; document.getElementById('modal-universal').style.display='none'; }).catch(() => { activeScanner = null; document.getElementById('modal-universal').style.display='none'; }); 
+        } else { document.getElementById('modal-universal').style.display='none'; }
+    }
+
+    function exportToExcel() { 
+        const wb = XLSX.utils.book_new(); 
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sales), "Sales"); 
+        XLSX.writeFile(wb, "POS_Backup.xlsx"); 
+        showToast("Excel Exported!", "success");
+    }
+    
+    function exportJSON() { 
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({i:inv, s:sales, a:archive, t:trash, r:reports})); 
+        const dlAnchorElem = document.createElement('a'); 
+        dlAnchorElem.setAttribute("href", dataStr); 
+        dlAnchorElem.setAttribute("download", "POS_Backup_Full.json"); 
+        dlAnchorElem.click(); 
+        showToast("JSON Backup Ready!", "success");
+    }
+
     function triggerRestore() { document.getElementById('restore-input').click(); }
-    function restoreData(e) { const reader = new FileReader(); reader.onload = (ev) => { try { const d = JSON.parse(ev.target.result); inv=d.i||[]; sales=d.s||[]; archive=d.a||[]; trash=d.t||[]; reports=d.r||[]; updateDB(); alert("Success!"); location.reload(); } catch(e) { alert("Invalid File!"); } }; reader.readAsText(e.target.files[0]); }
+    
+    function restoreData(e) { 
+        const reader = new FileReader(); 
+        reader.onload = (ev) => { 
+            try { 
+                const d = JSON.parse(ev.target.result); 
+                inv=d.i||[]; sales=d.s||[]; archive=d.a||[]; trash=d.t||[]; reports=d.r||[]; 
+                updateDB(() => {
+                    const l = translations[document.getElementById('lang-sel').value] || translations.bd;
+                    showToast(l.success_restore, "success");
+                    setTimeout(() => location.reload(), 1500);
+                });
+            } catch(e) { showToast("Invalid File!", "danger"); } 
+        }; 
+        reader.readAsText(e.target.files[0]); 
+    }
+
     function showAbout() {
         const l = translations[document.getElementById('lang-sel').value] || translations.bd;
         document.getElementById('modal-title').innerText = l.mabout;
